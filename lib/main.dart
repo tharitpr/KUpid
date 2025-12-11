@@ -10,7 +10,7 @@ import 'screens/edit_profile_page.dart';
 import 'screens/swipe_page.dart'; // นำเข้า
 import 'screens/chat_list_page.dart'; // นำเข้า
 import 'screens/chat_room_page.dart';
-
+import 'screens/friend_zone_page.dart'; // นำเข้า 
 void main() {
   runApp(const KupidApp());
 }
@@ -51,7 +51,7 @@ class KupidApp extends StatelessWidget {
         "/swipe": (context) => const SwipePage(), 
         "/chats": (context) => const ChatListPage(), 
         "/profile": (context) => const ProfilePage(), 
-        
+        "/friendzone": (context) => const FriendZonePage(),
         "/editprofile": (context) => const EditProfilePage(),
         "/chatroom": (context) => const ChatRoomPage(),
       },

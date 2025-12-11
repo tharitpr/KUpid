@@ -66,7 +66,7 @@ class _SwipePageState extends State<SwipePage>
         routeName = '/swipe'; 
         break;
       case 1: // Chat List Page
-        routeName = '/editprofile';
+        routeName = '/friendzone';
         break;
       case 2: // Profile Page
         routeName = '/chats';
@@ -93,7 +93,7 @@ class _SwipePageState extends State<SwipePage>
 
       // Match Logic (Mock)
       if (isRight && oldIndex % 2 == 0) { 
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("IT'S A MATCH! (Mock)")));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("IT'S A MATCH!")));
       }
     });
   }
