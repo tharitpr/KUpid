@@ -12,9 +12,9 @@ class RegisterPage extends StatelessWidget {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF003A1B), // เขียวเข้ม
-              Color(0xFF005A2B), // เขียวกลาง
-              Color(0xFF007A3B), // เขียวอ่อน
+              Color(0xFF002e1c), // เขียวเข้ม
+              Color(0xFF005433), // เขียวกลาง
+              Color(0xFF007a4a), // เขียวอ่อน
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -141,7 +141,7 @@ class RegisterPage extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
-                      decoration: TextDecoration.underline,
+                     // decoration: TextDecoration.underline,
                     ),
                   ),
                 ),

@@ -1,0 +1,14 @@
+flutter_native_splash:
+  # สีพื้นหลัง (สีเขียวเข้ม KUpid)
+  color: "#002e1c"
+  
+  # รูปภาพที่เป็นขอบมนและพื้นหลังโปร่งใสแล้ว
+  image: assets/images/kupid_logo.png
+
+  # สำหรับ Android 12+ ที่ชอบบังคับตัดรูป
+  # การใส่รูปที่เตรียมมาแล้วจะช่วยให้แสดงผลได้ดีขึ้น
+  android_12:
+    image: assets/images/kupid_logo.png
+    color: "#002e1c"
+  
+  fullscreen: true

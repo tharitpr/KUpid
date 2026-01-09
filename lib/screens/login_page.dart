@@ -6,8 +6,21 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0C2F1C), // เขียวเข้ม KUpid
-      body: SafeArea(
+      body: Container(
+                width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF002e1c), // เขียวเข้ม
+              Color(0xFF005433), // เขียวกลาง
+              Color(0xFF007a4a), // เขียวอ่อน
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+      child: SafeArea(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -17,6 +30,12 @@ class LoginPage extends StatelessWidget {
                 // -----------------------------
                 // LOGO / APP NAME
                 // -----------------------------
+                const Icon(
+                  Icons.favorite,
+                  color: Colors.white,
+                  size: 80,
+                ),
+                const SizedBox(height: 12),
                 Text(
                   "KUpid",
                   style: TextStyle(
@@ -35,7 +54,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 50),
+                const SizedBox(height: 30),
 
                 // -----------------------------
                 // EMAIL TEXT FIELD
@@ -112,31 +131,80 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                 ),
+                
+                const SizedBox(height: 5),
+                const Divider(
+                color: Colors.white24, // สีของเส้น (แนะนำสีจางๆ บนพื้นเขียวเข้ม)
+                thickness: 1.0,        // ความหนาของเส้น
+                height: 40,            // ความสูงของพื้นที่ "รอบๆ" เส้น (ทำหน้าที่เหมือน Margin บน-ล่าง)
+                indent: 20,            // เว้นระยะจากซ้าย
+                endIndent: 20,),
+                const SizedBox(height: 5),
+
+                GestureDetector(
+                  onTap: () {
+                     Navigator.pushNamed(context, '/swipe');
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1DB954), // เขียวสดกดเข้าได้
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "KU All Login",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 20),
 
                 // -----------------------------
                 // REGISTER LINK
                 // -----------------------------
-                GestureDetector(
+                Row (
+                  mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                  Text("ยังไม่มีบัญชี? ", // เคาะวรรคท้ายนิดนึงจะได้ไม่ติดกัน
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                        decoration: TextDecoration.none, // ปกติส่วนถามมักไม่มีขีดเส้นใต้ (แล้วแต่ Design นะครับ)
+                      ),
+                    ),
+                    
+                    // --- ข้อความที่ 2 ---
+                  GestureDetector(
                   onTap: () {
                     Navigator.pushNamed(context, "/register");
                   },
-                  child: const Text(
-                    "ยังไม่มีบัญชี? ลงทะเบียน",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      decoration: TextDecoration.underline,
-                    ),
+                  child: const
+                  Text("สมัครสมาชิกที่นี่",
+                      style: TextStyle( // decoration ต้องอยู่ในนี้
+                        color: Colors.green,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                    //    decoration: TextDecoration.underline, 
+                      ),
+                    ),)
+                  ],
                   ),
-                ),
+                
 
                 const SizedBox(height: 40),
               ],
             ),
           ),
         ),
+      ),
       ),
     );
   }

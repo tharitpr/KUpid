@@ -1,22 +1,49 @@
 // lib/main.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart'; // เพิ่มตัวนี้
 
 // Screens
 import 'screens/login_page.dart';
 import 'screens/register_page.dart';
 import 'screens/profile_page.dart';
 import 'screens/edit_profile_page.dart';
-import 'screens/swipe_page.dart'; // นำเข้า
-import 'screens/chat_list_page.dart'; // นำเข้า
+import 'screens/swipe_page.dart';
+import 'screens/chat_list_page.dart';
 import 'screens/chat_room_page.dart';
-import 'screens/friend_zone_page.dart'; // นำเข้า 
+import 'screens/friend_zone_page.dart';
+
 void main() {
+  // 1. ตรึงหน้า Splash ไว้ก่อนจนกว่าจะโหลดทรัพยากรเสร็จ
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  
   runApp(const KupidApp());
 }
 
-class KupidApp extends StatelessWidget {
+class KupidApp extends StatefulWidget { // เปลี่ยนเป็น StatefulWidget เพื่อจัดการการเอา Splash ออก
   const KupidApp({super.key});
+
+  @override
+  State<KupidApp> createState() => _KupidAppState();
+}
+
+class _KupidAppState extends State<KupidApp> {
+  
+  @override
+  void initState() {
+    super.initState();
+    initialization();
+  }
+
+  void initialization() async {
+    // 2. จำลองการโหลดข้อมูล หรือเช็คระบบ KU All Login ตรงนี้ (เช่น 2-3 วินาที)
+    // ในอนาคตคุณสามารถเช็คได้ว่า user เคย login หรือยังที่นี่
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // 3. เมื่อทุกอย่างพร้อมแล้ว ให้นำหน้า Splash ออกเพื่อแสดงผลแอป
+    FlutterNativeSplash.remove();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +52,7 @@ class KupidApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       // -------------------------
-      // THEME (เหมือนเดิม)
+      // THEME
       // -------------------------
       theme: ThemeData(
         fontFamily: "Kanit",
@@ -33,7 +60,7 @@ class KupidApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1DB954),
           primary: const Color(0xFF1DB954),
-          background: const Color(0xFF0C2F1C),
+          surface: const Color(0xFF0C2F1C), // แทนที่ background ใน Flutter เวอร์ชั่นใหม่
         ),
         scaffoldBackgroundColor: const Color(0xFF0C2F1C),
         useMaterial3: true,
@@ -46,8 +73,6 @@ class KupidApp extends StatelessWidget {
       routes: {
         "/login": (context) => const LoginPage(),
         "/register": (context) => const RegisterPage(),
-        
-        // **เปิด Route ที่ใช้ใน Bottom Nav**
         "/swipe": (context) => const SwipePage(), 
         "/chats": (context) => const ChatListPage(), 
         "/profile": (context) => const ProfilePage(), 

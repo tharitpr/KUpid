@@ -1,6 +1,6 @@
 // lib/screens/swipe_page.dart
 import 'package:flutter/material.dart';
-import 'dart:math';
+//import 'dart:math';
 
 // **นำเข้า Widget ที่แยกไฟล์แล้ว**
 import '../widgets/profile_card.dart'; 
