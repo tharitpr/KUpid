@@ -12,6 +12,7 @@ import 'screens/swipe_page.dart';
 import 'screens/chat_list_page.dart';
 import 'screens/chat_room_page.dart';
 import 'screens/friend_zone_page.dart';
+import 'screens/main_layout.dart';
 
 void main() {
   // 1. ตรึงหน้า Splash ไว้ก่อนจนกว่าจะโหลดทรัพยากรเสร็จ
@@ -69,10 +70,18 @@ class _KupidAppState extends State<KupidApp> {
       // -------------------------
       // ROUTES
       // -------------------------
-      initialRoute: "/login",
+      initialRoute: "/login", // เริ่มต้นที่หน้า Login ถูกแล้ว
       routes: {
         "/login": (context) => const LoginPage(),
         "/register": (context) => const RegisterPage(),
+        
+        // ✅ เพิ่มบรรทัดนี้สำคัญที่สุด! 
+        // เพื่อให้ตอน Login สำเร็จ เราจะสั่ง pushNamed มาที่ "/main"
+        "/main": (context) => const MainLayout(), 
+        
+        // ⚠️ หมายเหตุ: Route พวกข้างล่างนี้ (swipe, chats, profile) 
+        // จริงๆ แทบไม่ได้ใช้แล้ว เพราะมันถูกยัดไส้อยู่ใน MainLayout หมดแล้ว
+        // แต่ใส่ทิ้งไว้ก็ได้ครับ ไม่ error (เผื่ออนาคตอยากเปิดแยก)
         "/swipe": (context) => const SwipePage(), 
         "/chats": (context) => const ChatListPage(), 
         "/profile": (context) => const ProfilePage(), 

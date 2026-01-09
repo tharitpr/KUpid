@@ -110,7 +110,7 @@ class LoginPage extends StatelessWidget {
                 // -----------------------------
                 GestureDetector(
                   onTap: () {
-                     Navigator.pushNamed(context, '/swipe');
+                     Navigator.pushNamed(context, '/main');
                   },
                   child: Container(
                     width: double.infinity,

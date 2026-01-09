@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 // นำเข้าหน้าจอหลัก
 import 'swipe_page.dart'; 
+import 'activity_page.dart';
 import 'chat_list_page.dart'; 
 import 'profile_page.dart'; 
 
@@ -19,9 +20,10 @@ class _MainLayoutState extends State<MainLayout> {
 
   // รายการหน้าจอที่ Bottom Nav จะสลับไปมาระหว่าง
   final List<Widget> _pages = [
-    const SwipePage(),     // Index 0: หน้า Swiping
-    const ChatListPage(),  // Index 1: หน้า Chat List
-    const ProfilePage(),   // Index 2: หน้า Profile
+    const SwipePage(), //Index 0: หน้า Swiping
+    const ActivityPage(),  // Index 1: หน้า Activity
+    const ChatListPage(),  // Index 2: หน้า Chat List
+    const ProfilePage(),   // Index 3: หน้า Profile
   ];
 
   void _onItemTapped(int index) {
@@ -35,33 +37,33 @@ class _MainLayoutState extends State<MainLayout> {
     // ใช้ Scaffold เพื่อใส่ Bottom Navigation Bar
     return Scaffold(
       // body แสดงหน้าจอตาม index ที่ถูกเลือก
-      body: _pages[_selectedIndex], 
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
 
       // ------------------------------------------------
       // Bottom Navigation Bar (ปรับตามโทนเขียว/ขาว)
       // ------------------------------------------------
-      bottomNavigationBar: BottomNavigationBar(
+            bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white, // พื้นหลังสีขาว
-        selectedItemColor: Theme.of(context).primaryColor, // สีเขียวหลักของ Theme
-        unselectedItemColor: Colors.grey, // สีไอคอนที่ไม่ได้เลือก
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed, 
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Swipe',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'Chat',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Discover'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Activities'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
   }
 }
+
+/*
+
+
+*/

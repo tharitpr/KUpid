@@ -11,38 +11,26 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   // ฟังก์ชันสำหรับนำทางไปยังหน้าจอหลักอื่นๆ
-  void _onNavigate(int newIndex) {
-    // กำหนด Index ของหน้า Profile คือ 3 (Love/Friend=0, Chat=1, Profile=2)
-    // เนื่องจาก BottomNav นี้มี 4 รายการ (Love, Friend, Chat, Profile)
-    if (newIndex == 3) return; // อยู่หน้า Profile อยู่แล้ว
-
-    String routeName = '/profile'; // ค่าเริ่มต้น
-
-    switch (newIndex) {
-      case 0: // Love Zone (หรือ Swipe Page)
-        routeName = '/swipe';
-        break;
-      case 1: // Friend Zone (สมมติว่าเป็น /friendroute ใน main.dart)
-        routeName = '/friendroute';
-        break;
-      case 2: // Chat List Page
-        routeName = '/chats';
-        break;
-    }
-
-    // ใช้ pushReplacementNamed เพื่อนำทางไปหน้าใหม่และลบหน้าปัจจุบันออกจาก Stack
-    Navigator.of(context).pushReplacementNamed(routeName);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // เข้าถึงสีหลักของ Theme ( primaryColor)
-    final Color primaryColor = Theme.of(context).colorScheme.primary; 
+    @override
+    Widget build(BuildContext context) {
 
     return Scaffold(
-      // Background Color เป็นสีเข้ม (0xFF003A1B) ตาม Design
-      backgroundColor: const Color(0xFF003A1B), 
-      body: SafeArea(
+      body: Container(
+        padding: const EdgeInsets.symmetric(vertical: 30),
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFE5F2E4),
+              Color(0xFFE5F2E4),
+              Color(0xFFF2F1E4),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),  
+      child: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -66,7 +54,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                 decoration: BoxDecoration(
                   // ใช้สีอ่อนลงมาเพื่อให้มองเห็นขอบ Card บนพื้นหลังเข้ม
-                  color: Colors.white.withOpacity(0.1), 
+                  color: Colors.black.withOpacity(0.3), 
                   borderRadius: BorderRadius.circular(22),
                 ),
                 child: Column(
@@ -162,7 +150,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 },
                 child: const Text(
                   "Log Out",
-                  style: TextStyle(color: Colors.white70, fontSize: 15),
+                  style: TextStyle(color: Colors.red, fontSize: 18),
                 ),
               ),
 
@@ -170,37 +158,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
         ),
-      ),
-      
-      // ------------------------------------------------
-      // BOTTOM NAVIGATION BAR
-      // ------------------------------------------------
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white, 
-        selectedItemColor: primaryColor, // ใช้สีเขียวหลักจาก Theme
-        unselectedItemColor: Colors.grey, 
-        currentIndex: 3, // ตั้งค่าให้หน้า Profile ถูกเลือก (Index 3)
-        onTap: _onNavigate, 
-        type: BottomNavigationBarType.fixed, 
-        items: const <BottomNavigationBarItem>[
-          // Note: Bottom Nav ใน Profile Page ควรมี 4 รายการ (Love, Friend, Chat, Profile)
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Love',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people_alt),
-            label: 'Friends',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'Chat',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
+        ),
       ),
     );
   }
