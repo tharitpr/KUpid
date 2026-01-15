@@ -1,6 +1,9 @@
 // lib/screens/profile_page.dart
 
+import 'package:firebase_auth/firebase_auth.dart'; // import เพื่อดึงข้อมูล user ปัจจุบัน
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart'; // 1. Import Service
+import '../services/user_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -10,10 +13,16 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  // 1. เรียกใช้ AuthService
+  final AuthService _authService = AuthService();
+  
+  // ดึงข้อมูล User ปัจจุบันมาโชว์ (เพื่อ Test ว่า Login มาจริง)
+  final User? currentUser = FirebaseAuth.instance.currentUser;
+
   // --- Constants สีตาม Theme KUpid ---
-  final Color _primaryGreen = const Color(0xFF006400); // เขียวเข้ม
-  final Color _accentGreen = const Color(0xFF32CD32);  // เขียวสด
-  final Color _bgGrey = const Color(0xFFF9FAFB);       // เทาอ่อนมาก
+  final Color _primaryGreen = const Color(0xFF006400); 
+  final Color _accentGreen = const Color(0xFF32CD32);  
+  final Color _bgGrey = const Color(0xFFF9FAFB);       
 
   // ข้อมูลจำลอง (Mock Data)
   final List<String> _interests = ['Photography', 'Coffee', 'Reading', 'Music', 'Travel', 'Art'];
@@ -26,7 +35,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgGrey, // พื้นหลังสีเทาอ่อน
+      backgroundColor: _bgGrey,
       appBar: AppBar(
         backgroundColor: _primaryGreen,
         elevation: 0,
@@ -35,13 +44,12 @@ class _ProfilePageState extends State<ProfilePage> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
-        automaticallyImplyLeading: false, // ไม่แสดงปุ่ม Back เพราะอยู่ใน Main Menu
-        actions: [
-          // ปุ่ม Settings (ฟันเฟือง) มุมขวาบน
+        automaticallyImplyLeading: false, 
+          actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
-              Navigator.pushNamed(context, '/editprofile');
+              // Navigator.pushNamed(context, '/editprofile');
             },
           ),
         ],
@@ -50,7 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             // -------------------------------------------------------
-            // 1. PROFILE HEADER SECTION (ข้อมูลส่วนตัว + สถิติ)
+            // 1. PROFILE HEADER SECTION
             // -------------------------------------------------------
             Container(
               color: Colors.white,
@@ -58,7 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- Avatar & Edit Icon ---
+                  // --- Avatar ---
                   Stack(
                     children: [
                       Container(
@@ -67,36 +75,25 @@ class _ProfilePageState extends State<ProfilePage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
                           image: const DecorationImage(
-                            // TODO: เปลี่ยนเป็น AssetImage('assets/mock/profile.jpg') ถ้ามีรูปในเครื่อง
-                            image: NetworkImage('https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80'),
+                          image: NetworkImage('https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80'),
                             fit: BoxFit.cover,
                           ),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
-                          ],
+
                         ),
                       ),
-                      // ปุ่มดินสอเล็กๆ ตรงมุมรูป
+
                       Positioned(
                         bottom: -4,
                         right: -4,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/editprofile');
-                          },
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: _accentGreen,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                              boxShadow: [
-                                BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4),
-                              ],
-                            ),
-                            child: const Icon(Icons.edit, color: Colors.white, size: 16),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: _accentGreen,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
                           ),
+                          child: const Icon(Icons.edit, color: Colors.white, size: 16),
                         ),
                       ),
                     ],
@@ -109,9 +106,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Arisa, 21",
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+                        // *จุดแก้: ลองดึง Email มาโชว์แทนชื่อ เพื่อยืนยันว่า Backend ทำงาน*
+                        Text(
+                          currentUser?.email ?? "Arisa, 21", // ถ้ามี User จริง ให้โชว์ Email
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Row(
@@ -139,10 +138,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             
-            const SizedBox(height: 1), // เส้นคั่น
+            const SizedBox(height: 1),
 
             // -------------------------------------------------------
-            // 2. MY PHOTOS SECTION (รูปภาพ)
+            // 2. MY PHOTOS SECTION
             // -------------------------------------------------------
             Container(
               color: Colors.white,
@@ -151,21 +150,12 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("My Photos", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text("Add Photo", style: TextStyle(color: _primaryGreen)),
-                      )
-                    ],
-                  ),
+                  const Text("My Photos", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 10),
                   GridView.builder(
                     shrinkWrap: true, 
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _photos.length + 1, // +1 คือปุ่ม Add
+                    itemCount: _photos.length + 1,
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
                       crossAxisSpacing: 10,
@@ -183,8 +173,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         );
-                      } else {
-                        // ปุ่ม Add (+)
+                      } 
+                      else {
                         return Container(
                           decoration: BoxDecoration(
                             color: Colors.grey[50],
@@ -192,13 +182,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             border: Border.all(color: Colors.grey[300]!),
                           ),
                           child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add, color: Colors.grey[400], size: 30),
-                                Text("Add", style: TextStyle(color: Colors.grey[400], fontSize: 12)),
-                              ],
-                            ),
+                            child: Icon(Icons.add, color: Colors.grey[400], size: 30),
                           ),
                         );
                       }
@@ -209,74 +193,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
 
             // -------------------------------------------------------
-            // 3. ABOUT ME & INTERESTS (เกี่ยวกับฉัน และ ความสนใจ)
-            // -------------------------------------------------------
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.all(20),
-              margin: const EdgeInsets.only(top: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("About Me", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                      Icon(Icons.edit_outlined, size: 20, color: Colors.grey[400]),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Love exploring new cafes and taking photos around campus! Always up for an adventure or a good conversation over coffee. Let's connect! ☕📸",
-                    style: TextStyle(color: Colors.grey[700], height: 1.5),
-                  ),
-                  const SizedBox(height: 20),
-                  Text("Interests", style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _interests.map((interest) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: _accentGreen.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          interest,
-                          style: TextStyle(color: _primaryGreen, fontSize: 13, fontWeight: FontWeight.w500),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-
-            // -------------------------------------------------------
-            // 4. PROFILE INSIGHTS (ข้อมูลเชิงลึก)
-            // -------------------------------------------------------
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.all(20),
-              margin: const EdgeInsets.only(top: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Profile Insights", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 16),
-                  _buildInsightItem(Icons.favorite, "Profile Views", "Last 7 days", "127", _primaryGreen),
-                  const SizedBox(height: 12),
-                  _buildInsightItem(Icons.star, "Likes Received", "All time", "342", _accentGreen),
-                  const SizedBox(height: 12),
-                  _buildInsightItem(Icons.people, "Mutual Friends", "On KUpid", "23", Colors.purple),
-                ],
-              ),
-            ),
-
-            // -------------------------------------------------------
-            // 5. SETTINGS & LOGOUT (ตั้งค่า และ ออกจากระบบ)
+            // 5. SETTINGS & LOGOUT
             // -------------------------------------------------------
             Container(
               color: Colors.white,
@@ -292,11 +209,23 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildSettingsTile("Notifications"),
                   const Divider(height: 20),
                   
-                  // ปุ่ม Logout
+                  // ปุ่ม Logout (แก้ไขแล้ว)
                   InkWell(
-                    onTap: () {
-                      // กลับไปหน้า Login และลบประวัติการย้อนกลับทั้งหมด
-                      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                    // 2. เพิ่ม async logic ตรงนี้
+                    onTap: () async {
+                      // สั่ง Firebase ให้ Sign Out
+                      await _authService.signOut();
+
+                      if (context.mounted) {
+                        // กลับไปหน้า Login (ต้องแน่ใจว่าใน main.dart มี route ชื่อ '/login')
+                        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                        
+                        // หรือถ้า route '/login' ไม่เวิร์ค ให้ใช้บรรทัดล่างนี้แทน:
+                        // Navigator.of(context).pushAndRemoveUntil(
+                        //   MaterialPageRoute(builder: (context) => const LoginPage()), 
+                        //   (route) => false
+                        // );
+                      }
                     },
                     child: const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
@@ -312,6 +241,61 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
             ),
+
+            // -------------------------------------------------------
+            // DEV ONLY: ปุ่มสร้างข้อมูลคนปลอม (Mock Data)
+            // -------------------------------------------------------
+            Container(
+                margin: const EdgeInsets.all(20),
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange, // สีส้มให้รู้ว่าเป็นปุ่มเทส
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(Icons.build, color: Colors.white),
+                  label: const Text("GEN MOCK DATA (Dev Only)", style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    // เรียกฟังก์ชันเสกคน
+                    await UserService().generateMockUsers();
+                    
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("✅ สร้างข้อมูลคนปลอมเสร็จแล้ว! เช็ค Firestore ได้เลย")),
+                      );
+                    }
+                  },
+                ),
+              ),
+
+              // ... (ปุ่ม Gen Mock Data เดิม) ...
+
+              const SizedBox(height: 10), // เว้นวรรคนิดนึง
+
+              // ปุ่ม Cheat Code: บังคับให้ทุกคนชอบเรา
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pinkAccent, // สีชมพู
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(Icons.favorite, color: Colors.white),
+                  label: const Text("CHEAT: Make Everyone Like Me ❤️", style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    // เรียกใช้สูตรโกง
+                    await UserService().cheatMakeEveryoneLikeMe();
+                    
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("เสร็จ! ตอนนี้คุณฮอตมาก ทุกคนชอบคุณหมดแล้ว ไปปัดขวาเลย!")),
+                      );
+                    }
+                  },
+                ),
+              ),
+              
           ],
         ),
       ),
@@ -329,44 +313,9 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildInsightItem(IconData icon, String title, String subtitle, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-                Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-              ],
-            ),
-          ),
-          Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSettingsTile(String title) {
     return InkWell(
-      onTap: () {
-        // TODO: เชื่อมหน้า Settings ย่อย
-      },
+      onTap: () {},
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(

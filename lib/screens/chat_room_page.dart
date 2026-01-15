@@ -1,116 +1,120 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/chat_service.dart'; // ✅ เรียกใช้ Service
 
 class ChatRoomPage extends StatefulWidget {
-  const ChatRoomPage({super.key});
+  final String chatId;
+  final String friendName;
+  final String friendImage;
+
+  const ChatRoomPage({
+    super.key, 
+    required this.chatId,
+    required this.friendName,
+    required this.friendImage,
+  });
 
   @override
   State<ChatRoomPage> createState() => _ChatRoomPageState();
 }
 
-class _ChatRoomPageState extends State<ChatRoomPage> {
-  final List<Map<String, dynamic>> messages = [
-    {"text": "Hello!", "isMe": false},
-    {"text": "Hi! Nice to meet you 😄", "isMe": true},
-    {"text": "Are you from KU Bangkhen?", "isMe": false},
-  ];
+  class _ChatRoomPageState extends State<ChatRoomPage> {
+    final TextEditingController _messageController = TextEditingController();
+    final ChatService _chatService = ChatService(); // ✅ Instance
+    final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
-  final TextEditingController _controller = TextEditingController();
+    void _sendMessage() {
+      if (_messageController.text.trim().isEmpty) return;
+      
+      // เรียกใช้ Service
+      _chatService.sendMessage(widget.chatId, _messageController.text.trim());
+      _messageController.clear();
+    }
 
-  void sendMessage() {
-    if (_controller.text.trim().isEmpty) return;
-
-    setState(() {
-      messages.add({
-        "text": _controller.text.trim(),
-        "isMe": true,
-      });
-    });
-
-    _controller.clear();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green[800],
-        title: const Text("Chat Room"),
-      ),
-
-      body: Column(
-        children: [
-          // ---------- Chat List ----------
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final msg = messages[index];
-                final bool isMe = msg["isMe"];
-
-                return Align(
-                  alignment:
-                      isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                    constraints: const BoxConstraints(
-                      maxWidth: 250,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isMe ? Colors.green[700] : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      msg["text"],
-                      style: TextStyle(
-                        color: isMe ? Colors.white : Colors.black,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 1,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
           ),
+          title: Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: NetworkImage(widget.friendImage),
+                radius: 18,
+              ),
+              const SizedBox(width: 10),
+              Text(widget.friendName, style: const TextStyle(color: Colors.black, fontSize: 18)),
+            ],
+          ),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _chatService.getMessages(widget.chatId), // ✅ เรียกผ่าน Service
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                  
+                  var messages = snapshot.data!.docs;
 
-          // ---------- Input Box ----------
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            color: Colors.white,
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: "Message...",
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
+                  return ListView.builder(
+                    reverse: true,
+                    itemCount: messages.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                    itemBuilder: (context, index) {
+                      var msgData = messages[index].data() as Map<String, dynamic>;
+                      bool isMe = msgData['senderId'] == currentUserId;
+
+                      return Align(
+                        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isMe ? const Color(0xFF1DB954) : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            msgData['text'] ?? "",
+                            style: TextStyle(color: isMe ? Colors.white : Colors.black87, fontSize: 16),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            
+            // ช่องพิมพ์
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 5)]),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _messageController,
+                        decoration: const InputDecoration(hintText: "Type a message...", border: InputBorder.none),
                       ),
                     ),
-                  ),
+                    IconButton(
+                      icon: const Icon(Icons.send, color: Color(0xFF1DB954)),
+                      onPressed: _sendMessage,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                CircleAvatar(
-                  radius: 26,
-                  backgroundColor: Colors.green[700],
-                  child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: sendMessage,
-                  ),
-                )
-              ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    }
   }
-}

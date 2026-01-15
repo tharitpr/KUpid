@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 class ProfileCard extends StatelessWidget {
-  final Map<String, String> profileData; 
+  final Map<String, dynamic> profileData; 
 
   const ProfileCard({super.key, required this.profileData});
 
