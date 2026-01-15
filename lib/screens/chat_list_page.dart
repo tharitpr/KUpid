@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/chat_service.dart'; // ✅ ใช้ ChatService ตามที่คุยกัน
+import '../services/chat_service.dart'; // ✅ Import Service
 import 'chat_room_page.dart';
 
 class ChatListPage extends StatefulWidget {
@@ -25,40 +25,23 @@ class _ChatListPageState extends State<ChatListPage> {
         elevation: 0,
         centerTitle: false,
         automaticallyImplyLeading: false,
-        title: const Text('Messages', style: TextStyle(color: Colors.black, fontSize: 28, fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.search, color: Colors.black),
-            ),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 16),
-        ],
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _chatService.getChatRooms(), // ✅ ดึงข้อมูลจาก Service
+        title: const Text('Messages', style: TextStyle(color: Colors.black, fontSize: 28, fontWeight: FontWeight.bold)),),
+        body: StreamBuilder<QuerySnapshot>(
+        stream: _chatService.getChatRooms(), 
         builder: (context, snapshot) {
           
-          // 1. สถานะโหลด
-          if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
              return const Center(child: CircularProgressIndicator(color: Colors.green));
           }
 
-          // 2. ถ้าไม่มีข้อมูล
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.chat_bubble_outline, size: 60, color: Colors.grey[300]),
                   const SizedBox(height: 10),
-                  const Text("No matches yet.", style: TextStyle(color: Colors.grey)),
+                  const Text("No matches yet. Go swipe!", style: TextStyle(color: Colors.grey)),
                 ],
               ),
             );
@@ -67,26 +50,21 @@ class _ChatListPageState extends State<ChatListPage> {
           var allMatches = snapshot.data!.docs;
 
           // -------------------------------------------------------------
-          // 🧠 LOGIC แยกประเภท (ใช้ข้อมูลจริงทั้งหมด!)
+          // 🧠 LOGIC แยกประเภท
           // -------------------------------------------------------------
-          
-          // New Matches: ข้อความยังเป็น Default
-          var newMatchesList = allMatches.where((doc) {
-            var data = doc.data() as Map<String, dynamic>;
+        var newMatchesList = allMatches.where((doc) {
+        var data = doc.data() as Map<String, dynamic>;
             return (data['lastMessage'] ?? "") == "New Match! Say Hi 👋";
           }).toList();
 
-          // Recent: คุยกันแล้ว
-          var recentMatchesList = allMatches.where((doc) {
-            var data = doc.data() as Map<String, dynamic>;
+        var recentMatchesList = allMatches.where((doc) {
+        var data = doc.data() as Map<String, dynamic>;
             return (data['lastMessage'] ?? "") != "New Match! Say Hi 👋";
           }).toList();
 
           return Column(
             children: [
-              // ------------------------------------------
-              // ส่วนที่ 1: New Matches Section (แก้ไขให้ใช้ข้อมูลจริงแล้ว ✅)
-              // ------------------------------------------
+              // --- 1. New Matches (แถวบน) ---
               if (newMatchesList.isNotEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -107,21 +85,17 @@ class _ChatListPageState extends State<ChatListPage> {
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: newMatchesList.length, // ✅ ใช้ List จริง
+                    itemCount: newMatchesList.length,
                     itemBuilder: (context, index) {
                       var matchDoc = newMatchesList[index];
                       var matchData = matchDoc.data() as Map<String, dynamic>;
-                      
-                      List<dynamic> users = matchData['users'];
-                      String otherUserId = users.firstWhere((id) => id != currentUserId, orElse: () => "");
-
-                      // ใช้ FutureBuilder ดึงรูป/ชื่อ เหมือนกับ Recent
+                        List<dynamic> users = matchData['users'];
+                        String otherUserId = users.firstWhere((id) => id != currentUserId, orElse: () => "");
                       return FutureBuilder<Map<String, dynamic>?>(
                         future: _chatService.getUserProfile(otherUserId),
                         builder: (context, userSnapshot) {
                           if (!userSnapshot.hasData) return const SizedBox(width: 70); 
-                          
-                          var otherUser = userSnapshot.data!;
+                            var otherUser = userSnapshot.data!;
                           
                           return GestureDetector(
                             onTap: () {
@@ -175,9 +149,7 @@ class _ChatListPageState extends State<ChatListPage> {
                 ),
               ],
 
-              // ------------------------------------------
-              // ส่วนที่ 2: Recent Chat Section
-              // ------------------------------------------
+              // --- 2. Recent (แถวล่าง) ---
               const Padding(
                 padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                 child: Align(alignment: Alignment.centerLeft, child: Text("Recent", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
@@ -198,32 +170,28 @@ class _ChatListPageState extends State<ChatListPage> {
                       future: _chatService.getUserProfile(otherUserId),
                       builder: (context, userSnapshot) {
                         if (!userSnapshot.hasData) return const SizedBox.shrink();
-
-                        var otherUser = userSnapshot.data!;
-                        String displayName = otherUser['name'] ?? "Unknown";
-                        String displayImage = otherUser['photoUrl'] ?? "https://via.placeholder.com/150";
-                        String lastMsg = matchData['lastMessage'] ?? "";
+                         var otherUser = userSnapshot.data!;
 
                         return InkWell(
                           onTap: () {
                              Navigator.push(context, MaterialPageRoute(builder: (context) => ChatRoomPage(
                                 chatId: matchDoc.id,
-                                friendName: displayName,
-                                friendImage: displayImage,
+                                friendName: otherUser['name'] ?? "Unknown",
+                                friendImage: otherUser['photoUrl'] ?? "",
                               )));
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                             child: Row(
                               children: [
-                                CircleAvatar(radius: 28, backgroundImage: NetworkImage(displayImage)),
+                                CircleAvatar(radius: 28, backgroundImage: NetworkImage(otherUser['photoUrl'] ?? "https://via.placeholder.com/150")),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(displayName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                                      Text(lastMsg, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey[600])),
+                                      Text(otherUser['name'] ?? "", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                      Text(matchData['lastMessage'] ?? "", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey[600])),
                                     ],
                                   ),
                                 ),
