@@ -271,6 +271,7 @@ import 'chat_room_page.dart';
               ),
             ],
           ),
+          
           centerTitle: true,
           actions: [
             IconButton(
@@ -278,6 +279,7 @@ import 'chat_room_page.dart';
               onPressed: () {}, 
             )
           ],
+          automaticallyImplyLeading: false
         );
       }
 
