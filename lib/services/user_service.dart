@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -55,7 +56,7 @@ class UserService {
         'id': '' // เดี๋ยวค่อยมาแก้ หรือปล่อยว่างไว้ก่อนก็ได้ เพราะ Firestore มี documentID อยู่แล้ว
       });
     }
-    print("✅ เสกคนทิพย์เรียบร้อย 5 คน!");
+    debugPrint("✅ เสกคนทิพย์เรียบร้อย 5 คน!");
   }
 
   // [CHEAT CODE] สั่งให้ Mock User ทุกคนในระบบ "ชอบเรา"
@@ -81,10 +82,10 @@ class UserService {
           'targetName_DEBUG': 'ME (Force Like)', // ใส่ไว้ให้รู้ว่าโกงมา 555
         });
         
-        print("✅ บังคับให้ ${doc['name']} ชอบเราแล้ว!");
+        debugPrint("✅ บังคับให้ ${doc['name']} ชอบเราแล้ว!");
       }
     } catch (e) {
-      print("Cheat Error: $e");
+      debugPrint("Cheat Error: $e");
     }
   }
   
@@ -108,7 +109,7 @@ class UserService {
 
       return users;
     } catch (e) {
-        print("Error fetching users: $e");
+        debugPrint("Error fetching users: $e");
       return [];
     }
   }

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:flutter/foundation.dart';
 class MatchService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -12,8 +12,8 @@ class MatchService {
   Future<bool> swipeRight(String targetUserId, String targetName) async {
     String currentUserId = _auth.currentUser!.uid;
 
-    print("🔍 CHECKING MATCH...");
-    print("👉 Me ($currentUserId) LIKE -> Them ($targetUserId)");
+    debugPrint("🔍 CHECKING MATCH...");
+    debugPrint("👉 Me ($currentUserId) LIKE -> Them ($targetUserId)");
 
     try {
       // 1. บันทึกว่าเราชอบเขา
@@ -24,7 +24,7 @@ class MatchService {
         'type': 'like',
         'timestamp': FieldValue.serverTimestamp(),
       });
-      print("✅ Recorded my swipe in DB");
+      debugPrint("✅ Recorded my swipe in DB");
 
       // 2. เช็คว่าเขาเคยชอบเราไหม?
       // (ค้นหาใน swipes ว่ามี document ไหนไหมที่ from=เขา, to=เรา, type=like)
@@ -35,20 +35,20 @@ class MatchService {
           .where('type', isEqualTo: 'like')
           .get();
 
-      print("🔎 Query Result: Found ${checkSnapshot.docs.length} documents");
+      debugPrint("🔎 Query Result: Found ${checkSnapshot.docs.length} documents");
 
       if (checkSnapshot.docs.isNotEmpty) {
         // --- 🎉 JACKPOT! เจอข้อมูลว่าเขาชอบเรา ---
-        print("🎉 IT'S A MATCH! Creating chat room...");
+        debugPrint("🎉 IT'S A MATCH! Creating chat room...");
         
         await _createMatch(currentUserId, targetUserId);
         return true; // Match!
       } else {
-        print("❄️ No match yet. They haven't liked you (or Cheat Code didn't run for this user).");
+        debugPrint("❄️ No match yet. They haven't liked you (or Cheat Code didn't run for this user).");
         return false; // Not match
       }
     } catch (e) {
-      print("❌ Error swipe right: $e");
+      debugPrint("❌ Error swipe right: $e");
       return false;
     }
   }
@@ -76,10 +76,10 @@ class MatchService {
         'lastMessage': "New Match! Say Hi 👋",
         'lastMessageTime': FieldValue.serverTimestamp(),
       });
-      
-      print("✅ Created/Updated match room: matches/$chatId");
+
+      debugPrint("✅ Created/Updated match room: matches/$chatId");
     } catch (e) {
-      print("❌ Error creating match room: $e");
+      debugPrint("❌ Error creating match room: $e");
     }
   }
 

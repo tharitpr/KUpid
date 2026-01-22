@@ -29,7 +29,7 @@ class SwipeButtons extends StatelessWidget {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: .2),
               blurRadius: 8,
             )
           ],

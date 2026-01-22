@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   // Instance ของ Firebase Auth
@@ -32,7 +33,7 @@ class AuthService {
 
       return user;
     } on FirebaseAuthException catch (e) {
-      print("Auth Error: ${e.message}");
+      debugPrint("Auth Error: ${e.message}");
       return null;
     }
   }
@@ -46,7 +47,7 @@ class AuthService {
       );
       return result.user;
     } catch (e) {
-      print("Login Error: $e");
+      debugPrint("Login Error: $e");
       return null;
     }
   }

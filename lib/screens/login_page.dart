@@ -129,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: "Email",
                       labelStyle: const TextStyle(color: Colors.white70),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
+                      fillColor: Colors.white.withValues(alpha: 0.1),
                       prefixIcon: const Icon(Icons.email, color: Colors.white70), // เพิ่มไอคอนสวยๆ
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide.none,
@@ -156,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: "Password",
                       labelStyle: const TextStyle(color: Colors.white70),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
+                      fillColor: Colors.white.withValues(alpha: 0.1),
                       prefixIcon: const Icon(Icons.lock, color: Colors.white70), // เพิ่มไอคอนสวยๆ
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide.none,

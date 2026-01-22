@@ -80,7 +80,7 @@ import 'chat_room_page.dart';
             });
           }
         } catch (e) {
-          print("Error loading profiles: $e");
+          debugPrint("Error loading profiles: $e");
           setState(() => _isLoading = false);
         }
       }
@@ -94,12 +94,12 @@ import 'chat_room_page.dart';
         String targetUserId = targetUser['uid']; // ID ของคนที่เราปัด
 
         if (targetUserId.isEmpty) {
-          print("Error: No User ID found");
+          debugPrint("Error: No User ID found");
           return;
         }
 
         if (isLike) {
-          print("❤️ Liking ${targetUser['name']}...");
+          debugPrint("❤️ Liking ${targetUser['name']}...");
           // เรียก Service ปัดขวา
           bool isMatch = await _matchService.swipeRight(targetUserId, targetUser['name']);
           
@@ -154,7 +154,7 @@ import 'chat_room_page.dart';
             );
           }
         } else {
-          print("👎 Passing ${targetUser['name']}");
+          debugPrint("👎 Passing ${targetUser['name']}");
           // เรียก Service ปัดซ้าย
           await _matchService.swipeLeft(targetUserId);
         }
@@ -349,7 +349,7 @@ import 'chat_room_page.dart';
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20), 
-              color: isLike ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+              color: isLike ? Colors.green.withValues(alpha: 0.2) : Colors.red.withValues(alpha: 0.2),
             ),
             child: Center(
               child: Transform.rotate(
@@ -388,7 +388,7 @@ import 'chat_room_page.dart';
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                 ),
                 child: const Icon(Icons.search, size: 60, color: Colors.green),
               ),
