@@ -68,7 +68,7 @@ class MatchService {
   Future<void> _createMatch(String user1, String user2) async {
     try {
       // สร้าง ID ห้อง (เรียงตามตัวอักษร เพื่อให้ user1_user2 กับ user2_user1 ได้ ID เดียวกัน)
-      String chatId = user1.compareTo(user2) < 0 ? "${user1}_${user2}" : "${user2}_${user1}";
+      String chatId = user1.compareTo(user2) < 0 ? "${user1}_$user2" : "${user2}_$user1";
 
       await _firestore.collection('matches').doc(chatId).set({
         'users': [user1, user2], // Array นี้สำคัญมาก หน้า ChatList ใช้หาห้อง

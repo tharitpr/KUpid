@@ -44,7 +44,7 @@ class FriendZonePage extends StatelessWidget {
               trailing: IconButton(
                 icon: const Icon(Icons.chat),
                 onPressed: () {
-                  // TODO: นำทางไปยัง Chat Room กับเพื่อนคนนี้
+                  
                   Navigator.pushNamed(context, '/chatroom');
                 },
               ),
