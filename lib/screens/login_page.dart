@@ -292,8 +292,8 @@ class LoginPage extends StatefulWidget {
                             Navigator.pushNamed(context, "/register");
                           },
                           child: const Text(
-                            "สมัครสมาชิกที่นี่",
-                            style: TextStyle(color: Color(0xFF1DB954), fontSize: 14, fontWeight: FontWeight.bold),
+                            "Sign up here",
+                            style: TextStyle(color: Color(0xFF1DB954), fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         )
                       ],
