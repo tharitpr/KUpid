@@ -8,7 +8,7 @@ class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // 1. Sign Up (สมัครสมาชิก)
-  Future<User?> signUp(String email, String password, String name, String faculty) async {
+  Future<User?> signUp(String email, String password,) async {
     try {
       // 1. สร้าง User ใน Authentication Service
       UserCredential result = await _auth.createUserWithEmailAndPassword(
@@ -20,10 +20,15 @@ class AuthService {
 
       // 2. บันทึกข้อมูล Profile ลง Firestore (ทำรอบเดียวพอครับ)
       if (user != null) {
+        // ✅ 2. สั่งส่ง Email Verification ทันที!
+      try {
+        await user.sendEmailVerification();
+      } catch (e) {
+        debugPrint("Error sending verification email: $e");
+      }
+      
         await _firestore.collection('users').doc(user.uid).set({
           'id': user.uid,
-          'name': name,
-          'faculty': faculty,
           'email': email,
           'createdAt': FieldValue.serverTimestamp(), // เก็บแค่เวลาที่สมัคร
           'photoUrl': "", // รูปว่างไว้ก่อน

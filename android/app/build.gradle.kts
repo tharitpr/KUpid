@@ -41,7 +41,13 @@ android {
         }
     }
 }
-
+dependencies {
+    // บังคับใช้ Google Play Services Auth เวอร์ชันเสถียร
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    
+    // (เผื่อไว้) ถ้ายังไม่หาย ลองเพิ่มตัวนี้ด้วย
+    // implementation("com.google.android.gms:play-services-base:18.3.0")
+}
 flutter {
     source = "../.."
 }

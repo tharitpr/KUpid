@@ -11,36 +11,36 @@ class _ActivityPageState extends State<ActivityPage> {
   // --- Mock Data: เพิ่ม field 'description' เพื่อใช้โชว์ใน popup ---
   final List<Map<String, String>> activities = [
     {
-      "title": "KU Fair 2026 : เกษตรแฟร์",
-      "date": "2 - 10 กุมภาพันธ์ 2026",
-      "location": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+      "title": "KU Fair 2026",
+      "date": "Feb 2-10, 2026",
+      "location": "Kasetsart University Campus",
       "image": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop",
       "category": "Festival",
-      "description": "งานแฟร์ที่ยิ่งใหญ่ที่สุดแห่งปี! พบกับร้านค้ากว่า 500 ร้าน โซนนิสิต สินค้าทางการเกษตร และคอนเสิร์ตจากศิลปินชื่อดังทุกค่ำคืน ห้ามพลาดโซนร้านอาหารนิสิตที่อร่อยและราคาเป็นกันเอง"
+      "description": "The biggest festival of the year! Meet 500+ vendors, food stalls, and enjoy concerts by famous artists. Perfect for networking and experiencing campus life!"
     },
     {
       "title": "Engineering Open House",
-      "date": "15 มีนาคม 2026 | 09:00 - 16:00",
-      "location": "อาคารชูชาติ กำภู (คณะวิศวะ)",
+      "date": "Mar 15, 2026 | 09:00 - 16:00",
+      "location": "Engineering Building",
       "image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2070&auto=format&fit=crop",
       "category": "Academic",
-      "description": "เปิดบ้านวิศวะดงตาล! เชิญชวนน้องๆ มัธยมและผู้สนใจ เยี่ยมชมห้องปฏิบัติการสุดล้ำ หุ่นยนต์ AI และพูดคุยกับรุ่นพี่ตัวจริงเสียงจริง"
+      "description": "Welcome to the Engineering Faculty! Tour our state-of-the-art laboratories, meet senior students, and explore exciting AI robotics projects."
     },
     {
       "title": "Freshy Night Music Festival",
-      "date": "20 มีนาคม 2026 | 18:00 เป็นต้นไป",
-      "location": "สนามอินทรีจันทรสถิตย์",
+      "date": "Mar 20, 2026 | 18:00 onwards",
+      "location": "University Stadium",
       "image": "https://images.unsplash.com/photo-1459749411177-0473ef716175?q=80&w=2070&auto=format&fit=crop",
       "category": "Concert",
-      "description": "คอนเสิร์ตรับน้องสุดมันส์ พบกับวงดนตรีระดับประเทศที่จะมาระเบิดความสนุก เตรียมตัวให้พร้อมแล้วมากระโดดไปด้วยกัน!"
+      "description": "Amazing welcome concert for freshmen! Get ready to dance with famous bands and musicians. This is the event of the year!"
     },
     {
-      "title": "KU Run วิ่งลั่นทุ่ง",
-      "date": "1 เมษายน 2026 | 05:00 น.",
-      "location": "รอบมหาวิทยาลัย",
+      "title": "KU Run - Campus Run",
+      "date": "Apr 1, 2026 | 05:00 AM",
+      "location": "Around Campus",
       "image": "https://images.unsplash.com/photo-1552674605-46d50402f181?q=80&w=2070&auto=format&fit=crop",
       "category": "Sports",
-      "description": "วิ่งเพื่อสุขภาพรอบรั้วนนทรี ระยะทาง 5km และ 10km รายได้ส่วนหนึ่งมอบเป็นทุนการศึกษาให้นิสิตที่ขาดแคลนทุนทรัพย์"
+      "description": "Run for health around the beautiful campus! Choose 5km or 10km routes. Part of the proceeds support scholarships for students in need."
     },
   ];
 

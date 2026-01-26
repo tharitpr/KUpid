@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
+import 'screens/setup_profile_page.dart';
 // Screens
 import 'screens/login_page.dart';
 import 'screens/register_page.dart';
@@ -89,7 +89,7 @@ class _KupidAppState extends State<KupidApp> {
         "/profile": (context) => const ProfilePage(), 
         "/friendzone": (context) => const FriendZonePage(),
         "/editprofile": (context) => const EditProfilePage(),
-        
+        "/setupprofile": (context) => const SetupProfilePage(),
         // ❌ ลบบรรทัด chatroom ออกครับ เพราะหน้าแชทเราต้องส่งค่า dynamic เสมอ
         // "/chatroom": (context) => const ChatRoomPage(), 
       },
