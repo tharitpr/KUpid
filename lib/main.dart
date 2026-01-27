@@ -15,7 +15,7 @@ import 'screens/chat_list_page.dart';
 // import 'screens/chat_room_page.dart'; // ไม่ต้องใส่ใน Route แล้ว คอมเมนต์ออกหรือลบได้เลย
 import 'screens/friend_zone_page.dart';
 import 'screens/main_layout.dart';
-
+import 'screens/setup_interests_page.dart';
 void main() async {
   // 1. ตรึงหน้า Splash ไว้ก่อนจนกว่าจะโหลดทรัพยากรเสร็จ
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -90,6 +90,7 @@ class _KupidAppState extends State<KupidApp> {
         "/friendzone": (context) => const FriendZonePage(),
         "/editprofile": (context) => const EditProfilePage(),
         "/setupprofile": (context) => const SetupProfilePage(),
+        "/setupinterests": (context) => const SetupInterestsPage(),
         // ❌ ลบบรรทัด chatroom ออกครับ เพราะหน้าแชทเราต้องส่งค่า dynamic เสมอ
         // "/chatroom": (context) => const ChatRoomPage(), 
       },

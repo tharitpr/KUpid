@@ -8,8 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart'; // ✅ For picking images
 import 'package:http/http.dart' as http; // ✅ For uploading to Cloudinary
 import 'dart:convert'; // ✅ For parsing JSON
-import 'main_layout.dart';
-
+//import 'main_layout.dart';
+import 'setup_interests_page.dart';
 class SetupProfilePage extends StatefulWidget {
   const SetupProfilePage({super.key});
 
@@ -174,12 +174,12 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
         // If user picked an image, upload to Cloudinary
         photoUrl = await _uploadImageToCloudinary(_imageFile!);
       } 
-      
+      photoUrl ??= "";
       // If upload failed or no image picked, use default avatar
-      photoUrl ??= _selectedGender == 'Female'
+     /* photoUrl ??= _selectedGender == 'Female'
             ? 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=600'
             : 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=600';
-
+      */
       // ✅ 4. Save to Firestore
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'name': _nameController.text.trim(),
@@ -194,9 +194,13 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
       }, SetOptions(merge: true));
 
       if (mounted) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const MainLayout()));
+        Navigator.push(
+          context,
+          // ใช้ MaterialPageRoute ปลอดภัยกว่า pushNamed (ไม่ต้องไปแก้ main.dart)
+          MaterialPageRoute(builder: (context) => const SetupInterestsPage()), 
+        );
       }
+
     } catch (e) {
       if (mounted) {
         showDialog(

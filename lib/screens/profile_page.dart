@@ -1,7 +1,7 @@
 // lib/screens/profile_page.dart
 
 import 'dart:convert';
-//import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +9,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
-
+import 'edit_profile_page.dart'; 
+import 'setup_interests_page.dart'; // ✅ Import หน้าแก้ไขความสนใจ
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -18,7 +19,7 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-  class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> {
     final AuthService _authService = AuthService();
     final UserService _userService = UserService();
     final User? currentUser = FirebaseAuth.instance.currentUser;
@@ -28,7 +29,7 @@ class ProfilePage extends StatefulWidget {
     final Color _accentGreen = const Color(0xFF32CD32);
     final Color _bgGrey = const Color(0xFFF9FAFB);
 
-    final String malePlaceholder = "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=600";
+    
     bool _isUploading = false;
 
     // --- Cloudinary Config ---
@@ -40,7 +41,7 @@ class ProfilePage extends StatefulWidget {
       setState(() => _isUploading = true);
 
       String cloudName = "dgdl2uy9z"; 
-      String uploadPreset = "Kupid_tharit"; // ✅ เช็คชื่อ Preset ให้ตรงกับใน Cloudinary
+      String uploadPreset = "Kupid_tharit"; 
 
       try {
         var uri = Uri.parse("https://api.cloudinary.com/v1_1/$cloudName/image/upload");
@@ -104,8 +105,8 @@ class ProfilePage extends StatefulWidget {
           actions: [
             IconButton(
               icon: const Icon(Icons.settings, color: Colors.white),
-              onPressed: () { 
-                Navigator.pushNamed(context, '/editprofile');
+              onPressed: () {
+                // Navigator.pushNamed(context, '/settings'); 
               },
             ),
           ],
@@ -124,15 +125,18 @@ class ProfilePage extends StatefulWidget {
             Map<String, dynamic> userData = snapshot.data!.data() as Map<String, dynamic>;
 
             String displayName = userData['name'] ?? "User";
-            String displayImage = (userData['photoUrl'] != null && userData['photoUrl'].isNotEmpty)
-                ? userData['photoUrl']
-                : malePlaceholder;
+            
+            // ✅ 1. แก้ Logic รูปภาพ: ถ้าไม่มี URL ให้เป็นค่าว่าง "" (เพื่อไปเข้าเงื่อนไขโชว์ Avatar เทา)
+            String displayImage = userData['photoUrl'] ?? "";
+            
             String faculty = userData['faculty'] ?? "Faculty";
-            String age = userData['age'] != null ? "${userData['age']}" : "";
+            String age = userData['age'] != null ? ", ${userData['age']}" : "";
             String bio = userData['bio'] ?? "No bio yet...";
             String studentId = userData['studentId'] ?? "-";
-           // String gender = userData['gender'] ?? "-";
             List<dynamic> galleryPhotos = userData['galleryPhotos'] ?? [];
+            
+            // ✅ 2. ดึง Interests จริงออกมา (ถ้าไม่มีให้เป็น List ว่าง)
+            List<dynamic> interests = userData['interests'] ?? [];
 
             return SingleChildScrollView(
               child: Column(
@@ -158,21 +162,31 @@ class ProfilePage extends StatefulWidget {
                                   width: 100, height: 100,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .1), blurRadius: 10, offset: const Offset(0, 5))],
+                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(20),
-                                    child: Image.network(displayImage, fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[300], child: const Icon(Icons.person, size: 50, color: Colors.grey)),
-                                    ),
+                                    // ✅ เช็ค: ถ้ามีรูปให้โชว์รูป ถ้าไม่มีโชว์ Container สีเทา
+                                    child: displayImage.isNotEmpty
+                                        ? Image.network(
+                                            displayImage,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) => _buildDefaultAvatar(),
+                                          )
+                                        : _buildDefaultAvatar(),
                                   ),
                                 ),
                                 Positioned(
                                   bottom: -4, right: -4,
-                                  child: Container(
-                                    width: 32, height: 32,
-                                    decoration: BoxDecoration(color: _accentGreen, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                                    child: const Icon(Icons.edit, color: Colors.white, size: 16),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage()));
+                                    },
+                                    child: Container(
+                                      width: 32, height: 32,
+                                      decoration: BoxDecoration(color: _accentGreen, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                                      child: const Icon(Icons.edit, color: Colors.white, size: 16),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -183,7 +197,7 @@ class ProfilePage extends StatefulWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("$displayName, $age", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87), overflow: TextOverflow.ellipsis),
+                                  Text("$displayName$age", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87), overflow: TextOverflow.ellipsis),
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
@@ -222,7 +236,7 @@ class ProfilePage extends StatefulWidget {
                   const SizedBox(height: 12),
 
                   // -------------------------------------------------------
-                  // 2. ABOUT ME (BIO) - ✅ สวยงามขึ้น
+                  // 2. ABOUT ME (BIO) & INTERESTS
                   // -------------------------------------------------------
                   Container(
                     width: double.infinity,
@@ -231,7 +245,7 @@ class ProfilePage extends StatefulWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,26 +267,39 @@ class ProfilePage extends StatefulWidget {
                         const Divider(),
                         const SizedBox(height: 10),
 
-                        // 🏷️ Mockup Interests Tags (สิ่งที่ควรมี)
+                        // ✅ INTERESTS SECTION (ของจริง)
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(Icons.local_activity, color: _primaryGreen),
-                            const SizedBox(width: 8),
-                            const Text("Interests", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            Row(
+                              children: [
+                                Icon(Icons.local_activity, color: _primaryGreen),
+                                const SizedBox(width: 8),
+                                const Text("Interests", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            // ✅ ปุ่ม Edit Interest
+                            IconButton(
+                              icon: const Icon(Icons.edit, size: 20, color: Colors.grey),
+                              onPressed: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => const SetupInterestsPage()));
+                              },
+                            )
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            _buildInterestChip("🏸 Badminton"),
-                            _buildInterestChip("🥘 Shabu"),
-                            _buildInterestChip("☕ Café Hopping"),
-                            _buildInterestChip("💻 Coding"),
-                            _buildInterestChip("🐈 Cats"),
-                          ],
-                        ),
+                        const SizedBox(height: 8),
+                        
+                        // Loop แสดง Interest Chips
+                        if (interests.isEmpty)
+                          const Text("No interests added yet.", style: TextStyle(color: Colors.grey))
+                        else
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: interests.map((interest) {
+                              return _buildInterestChip(interest.toString());
+                            }).toList(),
+                          ),
                       ],
                     ),
                   ),
@@ -288,7 +315,7 @@ class ProfilePage extends StatefulWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,14 +331,12 @@ class ProfilePage extends StatefulWidget {
                         GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-
-                         itemCount: galleryPhotos.length < 6 ? galleryPhotos.length + 1 : galleryPhotos.length,
-                          
+                          itemCount: galleryPhotos.length < 9 ? galleryPhotos.length + 1 : galleryPhotos.length,
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 1,
                           ),
                           itemBuilder: (context, index) {
-                            if (index == galleryPhotos.length && galleryPhotos.length < 6) {
+                            if (index == galleryPhotos.length && galleryPhotos.length < 9) {
                               return GestureDetector(
                                 onTap: _isUploading ? null : _pickAndUploadGalleryPhoto,
                                 child: Container(
@@ -343,7 +368,7 @@ class ProfilePage extends StatefulWidget {
                                     onTap: () => _deletePhoto(imgUrl),
                                     child: Container(
                                       padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(color: Colors.red.withValues(alpha: .8), shape: BoxShape.circle),
+                                      decoration: BoxDecoration(color: Colors.red.withOpacity(0.8), shape: BoxShape.circle),
                                       child: const Icon(Icons.close, color: Colors.white, size: 14),
                                     ),
                                   ),
@@ -365,7 +390,7 @@ class ProfilePage extends StatefulWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
                     ),
                     child: Column(
                       children: [
@@ -445,6 +470,16 @@ class ProfilePage extends StatefulWidget {
 
     // --- Helper Widgets ---
 
+    // ✅ Widget สำหรับแสดง Avatar สีเทา (เมื่อไม่มีรูป)
+    Widget _buildDefaultAvatar() {
+      return Container(
+        color: Colors.grey[200],
+        child: const Center(
+          child: Icon(Icons.person, size: 50, color: Colors.grey),
+        ),
+      );
+    }
+
     Widget _buildStatItem(String value, String label) {
       return Column(children: [
         Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _primaryGreen)), 
@@ -467,14 +502,13 @@ class ProfilePage extends StatefulWidget {
       );
     }
 
-    // Widget สำหรับสร้าง Chips สวยๆ
     Widget _buildInterestChip(String label) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: _primaryGreen.withValues(alpha: .08),
+          color: _primaryGreen.withOpacity(0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _primaryGreen.withValues(alpha: .2)),
+          border: Border.all(color: _primaryGreen.withOpacity(0.2)),
         ),
         child: Text(label, style: TextStyle(color: _primaryGreen, fontWeight: FontWeight.w600, fontSize: 13)),
       );
