@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:kupid/screens/setup_profile_page.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import 'edit_profile_page.dart'; 
@@ -29,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final Color _accentGreen = const Color(0xFF32CD32);
     final Color _bgGrey = const Color(0xFFF9FAFB);
 
-    
+
     bool _isUploading = false;
 
     // --- Cloudinary Config ---
@@ -393,10 +394,22 @@ class _ProfilePageState extends State<ProfilePage> {
                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
                     ),
                     child: Column(
-                      children: [
-                        _buildSettingsTile(Icons.person_outline, "Account Settings"),
-                        _buildSettingsTile(Icons.lock_outline, "Privacy & Safety"),
-                        _buildSettingsTile(Icons.notifications_outlined, "Notifications"),
+                         children: [
+                        // ✅ 1. Account Settings -> ไปหน้า SettingsPage
+                        _buildSettingsTile(Icons.person_outline, "Account Settings", onTap: () {
+                           Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage())); 
+                           // ⚠️ อย่าลืม import 'settings_page.dart'; ข้างบนด้วยนะครับ
+                        }),
+                        
+                        // ✅ 2. Privacy & Safety -> (ตัวอย่าง) โชว์ Dialog หรือไปหน้าใหม่
+                        _buildSettingsTile(Icons.lock_outline, "Privacy & Safety", onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Privacy Settings coming soon!")));
+                        }),
+                        
+                        // ✅ 3. Notifications -> (ตัวอย่าง) โชว์ Dialog หรือไปหน้าใหม่
+                        _buildSettingsTile(Icons.notifications_outlined, "Notifications", onTap: () {
+                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Notification Settings coming soon!")));
+                        }),
                         const Divider(),
                         InkWell(
                           onTap: () async {
@@ -487,9 +500,9 @@ class _ProfilePageState extends State<ProfilePage> {
       ]);
     }
 
-    Widget _buildSettingsTile(IconData icon, String title) {
+    Widget _buildSettingsTile(IconData icon, String title, {required VoidCallback onTap}) {
       return InkWell(
-        onTap: () {}, 
+        onTap: onTap, 
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12), 
           child: Row(children: [

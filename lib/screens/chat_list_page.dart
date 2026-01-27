@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/chat_service.dart'; // ✅ Import Service
+import '../services/chat_service.dart';
 import 'chat_room_page.dart';
 
 class ChatListPage extends StatefulWidget {
@@ -12,9 +12,30 @@ class ChatListPage extends StatefulWidget {
 }
 
 class _ChatListPageState extends State<ChatListPage> {
-  // ✅ เรียกใช้ ChatService
   final ChatService _chatService = ChatService();
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
+  // --- 🕒 ฟังก์ชันแปลงเวลาให้สวยงาม ---
+  String _formatTimestamp(Timestamp? timestamp) {
+    if (timestamp == null) return "";
+    
+    DateTime date = timestamp.toDate();
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day);
+    DateTime yesterday = DateTime(now.year, now.month, now.day - 1);
+    DateTime dateToCheck = DateTime(date.year, date.month, date.day);
+
+    if (dateToCheck == today) {
+      // วันนี้: แสดงเวลา (เช่น 14:30)
+      return "${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+    } else if (dateToCheck == yesterday) {
+      // เมื่อวาน: แสดง Yesterday
+      return "Yesterday";
+    } else {
+      // วันอื่น: แสดงวันที่ (เช่น 28/01)
+      return "${date.day}/${date.month}";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,16 +46,20 @@ class _ChatListPageState extends State<ChatListPage> {
         elevation: 0,
         centerTitle: false,
         automaticallyImplyLeading: false,
-        title: const Text('Messages', style: TextStyle(color: Colors.black, fontSize: 28, fontWeight: FontWeight.bold)),),
-        body: StreamBuilder<QuerySnapshot>(
+        title: const Text(
+          'Messages', 
+          style: TextStyle(color: Colors.black, fontSize: 28, fontWeight: FontWeight.bold)
+        ),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
         stream: _chatService.getChatRooms(), 
         builder: (context, snapshot) {
           
-        if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
              return const Center(child: CircularProgressIndicator(color: Colors.green));
           }
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -52,13 +77,13 @@ class _ChatListPageState extends State<ChatListPage> {
           // -------------------------------------------------------------
           // 🧠 LOGIC แยกประเภท
           // -------------------------------------------------------------
-        var newMatchesList = allMatches.where((doc) {
-        var data = doc.data() as Map<String, dynamic>;
+          var newMatchesList = allMatches.where((doc) {
+            var data = doc.data() as Map<String, dynamic>;
             return (data['lastMessage'] ?? "") == "New Match! Say Hi 👋";
           }).toList();
 
-        var recentMatchesList = allMatches.where((doc) {
-        var data = doc.data() as Map<String, dynamic>;
+          var recentMatchesList = allMatches.where((doc) {
+            var data = doc.data() as Map<String, dynamic>;
             return (data['lastMessage'] ?? "") != "New Match! Say Hi 👋";
           }).toList();
 
@@ -89,13 +114,14 @@ class _ChatListPageState extends State<ChatListPage> {
                     itemBuilder: (context, index) {
                       var matchDoc = newMatchesList[index];
                       var matchData = matchDoc.data() as Map<String, dynamic>;
-                        List<dynamic> users = matchData['users'];
-                        String otherUserId = users.firstWhere((id) => id != currentUserId, orElse: () => "");
+                      List<dynamic> users = matchData['users'];
+                      String otherUserId = users.firstWhere((id) => id != currentUserId, orElse: () => "");
+                      
                       return FutureBuilder<Map<String, dynamic>?>(
                         future: _chatService.getUserProfile(otherUserId),
                         builder: (context, userSnapshot) {
                           if (!userSnapshot.hasData) return const SizedBox(width: 70); 
-                            var otherUser = userSnapshot.data!;
+                          var otherUser = userSnapshot.data!;
                           
                           return GestureDetector(
                             onTap: () {
@@ -115,7 +141,7 @@ class _ChatListPageState extends State<ChatListPage> {
                                         padding: const EdgeInsets.all(3),
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.red.withValues(alpha: 0.5), width: 2),
+                                          border: Border.all(color: Colors.red.withOpacity(0.5), width: 2),
                                         ),
                                         child: CircleAvatar(
                                           radius: 30,
@@ -166,11 +192,15 @@ class _ChatListPageState extends State<ChatListPage> {
                     List<dynamic> users = matchData['users'];
                     String otherUserId = users.firstWhere((id) => id != currentUserId, orElse: () => "");
 
+                    // ✅ ดึง timestamp ออกมาแปลงเป็นเวลา
+                    Timestamp? lastTime = matchData['lastMessageTime'] as Timestamp?;
+                    String timeText = _formatTimestamp(lastTime);
+
                     return FutureBuilder<Map<String, dynamic>?>(
                       future: _chatService.getUserProfile(otherUserId),
                       builder: (context, userSnapshot) {
                         if (!userSnapshot.hasData) return const SizedBox.shrink();
-                         var otherUser = userSnapshot.data!;
+                        var otherUser = userSnapshot.data!;
 
                         return InkWell(
                           onTap: () {
@@ -184,14 +214,50 @@ class _ChatListPageState extends State<ChatListPage> {
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                             child: Row(
                               children: [
-                                CircleAvatar(radius: 28, backgroundImage: NetworkImage(otherUser['photoUrl'] ?? "https://via.placeholder.com/150")),
+                                // Avatar
+                                Stack(
+                                  children: [
+                                    CircleAvatar(radius: 28, backgroundImage: NetworkImage(otherUser['photoUrl'] ?? "https://via.placeholder.com/150")),
+                                    if (otherUser['isOnline'] == true)
+                                      Positioned(
+                                        right: 0, bottom: 0,
+                                        child: Container(
+                                          width: 14, height: 14,
+                                          decoration: BoxDecoration(color: Colors.green, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                                        ),
+                                      ),
+                                  ],
+                                ),
                                 const SizedBox(width: 16),
+                                
+                                // Text Column
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(otherUser['name'] ?? "", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                                      Text(matchData['lastMessage'] ?? "", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey[600])),
+                                      // แถวบน: ชื่อ + เวลา
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            otherUser['name'] ?? "", 
+                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)
+                                          ),
+                                          // ✅ แสดงเวลาตรงนี้
+                                          Text(
+                                            timeText, 
+                                            style: TextStyle(fontSize: 12, color: Colors.grey[500])
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      // แถวล่าง: ข้อความล่าสุด
+                                      Text(
+                                        matchData['lastMessage'] ?? "", 
+                                        maxLines: 1, 
+                                        overflow: TextOverflow.ellipsis, 
+                                        style: TextStyle(color: Colors.grey[600], fontSize: 14)
+                                      ),
                                     ],
                                   ),
                                 ),
