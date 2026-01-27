@@ -37,12 +37,26 @@ class EditProfilePage extends StatefulWidget {
 
     // Dropdown Lists
     final List<String> _faculties = [
-      "Engineering (วิศวกรรมศาสตร์)", "Science (วิทยาศาสตร์)", "Agriculture (เกษตร)",
-      "Business Administration (บริหารธุรกิจ)", "Humanities (มนุษยศาสตร์)", 
-      "Social Sciences (สังคมศาสตร์)", "Economics (เศรษฐศาสตร์)", "Education (ศึกษาศาสตร์)", 
-      "Agro-Industry (อุตสาหกรรมเกษตร)", "Fisheries (ประมง)", 
-      "Architecture (สถาปัตยกรรมศาสตร์)", "Veterinary Medicine (สัตวแพทยศาสตร์)", 
-      "Environment (สิ่งแวดล้อม)", "Other (อื่นๆ)"
+    "Agriculture (เกษตร)",
+    "Agro-Industry (อุตสาหกรรมเกษตร)",
+    "Architecture (สถาปัตยกรรมศาสตร์)",
+    "Business Administration (บริหารธุรกิจ)",
+    "Economics (เศรษฐศาสตร์)",
+    "Education (ศึกษาศาสตร์)",
+    "Engineering (วิศวกรรมศาสตร์)",
+    "Environment (สิ่งแวดล้อม)",
+    "Fisheries (ประมง)",
+    "Forestry (วนศาสตร์)",
+    "Humanities (มนุษยศาสตร์)",
+    "International College (วิทยาลัยนานาชาติ)",
+    "Medicine (แพทยศาสตร์)",
+    "Nursing (พยาบาลศาสตร์)",
+    "Pharmacy (เภสัชศาสตร์)",
+    "School of Integrated Science (วิทยาลัยบูรณาการศาสตร์)",
+    "Science (วิทยาศาสตร์)",
+    "Social Sciences (สังคมศาสตร์)",
+    "Veterinary Medicine (สัตวแพทยศาสตร์)",
+    "Veterinary Technology (เทคนิคการสัตวแพทย์)",
     ];
     final List<String> _genders = ["Male", "Female", "LGBTQ+", "Prefer not to say"];
 
@@ -177,7 +191,7 @@ class EditProfilePage extends StatefulWidget {
                                 width: 120, height: 120,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
+                                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .1), blurRadius: 10, offset: const Offset(0, 5))],
                                   border: Border.all(color: Colors.white, width: 4),
                                 ),
                                 child: CircleAvatar(
@@ -240,7 +254,7 @@ class EditProfilePage extends StatefulWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(_fieldRadius),
                           gradient: LinearGradient(colors: [_primaryGreen, const Color(0xFF007A50)]),
-                          boxShadow: [BoxShadow(color: _primaryGreen.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
+                          boxShadow: [BoxShadow(color: _primaryGreen.withValues(alpha: .3), blurRadius: 10, offset: const Offset(0, 5))],
                         ),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -277,7 +291,7 @@ class EditProfilePage extends StatefulWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.08), blurRadius: 10, offset: const Offset(0, 4))],
+            boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: .08), blurRadius: 10, offset: const Offset(0, 4))],
           ),
           child: TextFormField(
             controller: controller,
@@ -309,7 +323,7 @@ class EditProfilePage extends StatefulWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.08), blurRadius: 10, offset: const Offset(0, 4))],
+          boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: .08), blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: DropdownButtonFormField<String>(
           value: value,

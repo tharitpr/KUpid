@@ -158,7 +158,7 @@ class ProfilePage extends StatefulWidget {
                                   width: 100, height: 100,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
+                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .1), blurRadius: 10, offset: const Offset(0, 5))],
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(20),
@@ -231,7 +231,7 @@ class ProfilePage extends StatefulWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, 2))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,7 +288,7 @@ class ProfilePage extends StatefulWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, 2))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,7 +343,7 @@ class ProfilePage extends StatefulWidget {
                                     onTap: () => _deletePhoto(imgUrl),
                                     child: Container(
                                       padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(color: Colors.red.withOpacity(0.8), shape: BoxShape.circle),
+                                      decoration: BoxDecoration(color: Colors.red.withValues(alpha: .8), shape: BoxShape.circle),
                                       child: const Icon(Icons.close, color: Colors.white, size: 14),
                                     ),
                                   ),
@@ -365,7 +365,7 @@ class ProfilePage extends StatefulWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, 2))],
                     ),
                     child: Column(
                       children: [
@@ -472,9 +472,9 @@ class ProfilePage extends StatefulWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: _primaryGreen.withOpacity(0.08),
+          color: _primaryGreen.withValues(alpha: .08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _primaryGreen.withOpacity(0.2)),
+          border: Border.all(color: _primaryGreen.withValues(alpha: .2)),
         ),
         child: Text(label, style: TextStyle(color: _primaryGreen, fontWeight: FontWeight.w600, fontSize: 13)),
       );

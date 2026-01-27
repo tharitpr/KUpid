@@ -64,7 +64,7 @@ class _KupidAppState extends State<KupidApp> {
       // -------------------------
       theme: ThemeData(
         fontFamily: "Kanit",
-        primaryColor: const Color(0xFF0C2F1C),
+        primaryColor: const Color(0xFF1DB954),
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1DB954),
           primary: const Color(0xFF1DB954),

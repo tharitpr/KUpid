@@ -37,21 +37,27 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
   final Color _accentColor = const Color(0xFFC5A065); // Muted Gold
   final double _fieldRadius = 16.0;
 
-  final List<String> _faculties = [
-    "Engineering (วิศวกรรมศาสตร์)",
-    "Science (วิทยาศาสตร์)",
-    "Agriculture (เกษตร)",
-    "Business Administration (บริหารธุรกิจ)",
-    "Humanities (มนุษยศาสตร์)",
-    "Social Sciences (สังคมศาสตร์)",
-    "Economics (เศรษฐศาสตร์)",
-    "Education (ศึกษาศาสตร์)",
-    "Agro-Industry (อุตสาหกรรมเกษตร)",
-    "Fisheries (ประมง)",
-    "Architecture (สถาปัตยกรรมศาสตร์)",
-    "Veterinary Medicine (สัตวแพทยศาสตร์)",
-    "Environment (สิ่งแวดล้อม)",
-    "Other (อื่นๆ)"
+  final List<String> _faculties = [   
+  "Agriculture (เกษตร)",
+  "Agro-Industry (อุตสาหกรรมเกษตร)",
+  "Architecture (สถาปัตยกรรมศาสตร์)",
+  "Business Administration (บริหารธุรกิจ)",
+  "Economics (เศรษฐศาสตร์)",
+  "Education (ศึกษาศาสตร์)",
+  "Engineering (วิศวกรรมศาสตร์)",
+  "Environment (สิ่งแวดล้อม)",
+  "Fisheries (ประมง)",
+  "Forestry (วนศาสตร์)",
+  "Humanities (มนุษยศาสตร์)",
+  "International College (วิทยาลัยนานาชาติ)",
+  "Medicine (แพทยศาสตร์)",
+  "Nursing (พยาบาลศาสตร์)",
+  "Pharmacy (เภสัชศาสตร์)",
+  "School of Integrated Science (วิทยาลัยบูรณาการศาสตร์)",
+  "Science (วิทยาศาสตร์)",
+  "Social Sciences (สังคมศาสตร์)",
+  "Veterinary Medicine (สัตวแพทยศาสตร์)",
+  "Veterinary Technology (เทคนิคการสัตวแพทย์)",
   ];
 
   final List<String> _genders = ["Male", "Female", "LGBTQ+", "Prefer not to say"];
@@ -246,7 +252,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: .1),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -297,7 +303,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                               border: Border.all(color: Colors.white, width: 2),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: .2),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 )
@@ -399,9 +405,9 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _primaryColor.withOpacity(0.05),
+                  color: _primaryColor.withValues( alpha: .05),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _primaryColor.withOpacity(0.1)),
+                  border: Border.all(color: _primaryColor.withValues(alpha: .1)),
                 ),
                 child: Row(
                   children: [
@@ -410,7 +416,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                     Expanded(
                       child: Text(
                         "Tip: Mention your hobbies, favorite food, or study major to start a conversation!",
-                        style: TextStyle(fontSize: 12, color: _primaryColor.withOpacity(0.8)),
+                        style: TextStyle(fontSize: 12, color: _primaryColor.withValues(alpha: .8)),
                       ),
                     ),
                   ],
@@ -436,7 +442,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                   borderRadius: BorderRadius.circular(_fieldRadius),
                   boxShadow: [
                     BoxShadow(
-                      color: _primaryColor.withOpacity(0.3),
+                      color: _primaryColor.withValues(alpha: .3),
                       blurRadius: 15,
                       offset: const Offset(0, 8),
                     )
@@ -486,7 +492,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
           borderRadius: BorderRadius.circular(_fieldRadius),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.grey.withValues(alpha: .08),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -538,7 +544,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
         borderRadius: BorderRadius.circular(_fieldRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: Colors.grey.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
