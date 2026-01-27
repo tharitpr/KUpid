@@ -7,11 +7,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:kupid/screens/setup_profile_page.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import 'edit_profile_page.dart'; 
-import 'setup_interests_page.dart'; // ✅ Import หน้าแก้ไขความสนใจ
+import 'setup_interests_page.dart';
+import 'privacy_settings_page.dart'; // Import Privacy
+import 'notification_settings_page.dart'; // Import Notification
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -29,7 +30,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final Color _primaryGreen = const Color(0xFF006400);
     final Color _accentGreen = const Color(0xFF32CD32);
     final Color _bgGrey = const Color(0xFFF9FAFB);
-
 
     bool _isUploading = false;
 
@@ -74,7 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     Future<void> _deletePhoto(String photoUrl) async {
-      bool confirm = await showDialog(
+       bool confirm = await showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text("Delete Photo"),
@@ -98,18 +98,18 @@ class _ProfilePageState extends State<ProfilePage> {
       return Scaffold(
         backgroundColor: _bgGrey,
         appBar: AppBar(
-          backgroundColor: _primaryGreen,
+          backgroundColor: _bgGrey,
           elevation: 0,
-          title: const Text("My Profile", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: const Text("My Profile", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 28)),
           centerTitle: false,
           automaticallyImplyLeading: false,
           actions: [
-            IconButton(
+            /*IconButton(
               icon: const Icon(Icons.settings, color: Colors.white),
               onPressed: () {
-                // Navigator.pushNamed(context, '/settings'); 
+                 Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
               },
-            ),
+            ),*/
           ],
         ),
         body: StreamBuilder<DocumentSnapshot>(
@@ -126,25 +126,18 @@ class _ProfilePageState extends State<ProfilePage> {
             Map<String, dynamic> userData = snapshot.data!.data() as Map<String, dynamic>;
 
             String displayName = userData['name'] ?? "User";
-            
-            // ✅ 1. แก้ Logic รูปภาพ: ถ้าไม่มี URL ให้เป็นค่าว่าง "" (เพื่อไปเข้าเงื่อนไขโชว์ Avatar เทา)
             String displayImage = userData['photoUrl'] ?? "";
-            
             String faculty = userData['faculty'] ?? "Faculty";
             String age = userData['age'] != null ? ", ${userData['age']}" : "";
             String bio = userData['bio'] ?? "No bio yet...";
             String studentId = userData['studentId'] ?? "-";
             List<dynamic> galleryPhotos = userData['galleryPhotos'] ?? [];
-            
-            // ✅ 2. ดึง Interests จริงออกมา (ถ้าไม่มีให้เป็น List ว่าง)
             List<dynamic> interests = userData['interests'] ?? [];
 
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  // -------------------------------------------------------
                   // 1. HEADER CARD (Avatar + Basic Info)
-                  // -------------------------------------------------------
                   Container(
                     decoration: const BoxDecoration(
                       color: Colors.white,
@@ -167,7 +160,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(20),
-                                    // ✅ เช็ค: ถ้ามีรูปให้โชว์รูป ถ้าไม่มีโชว์ Container สีเทา
                                     child: displayImage.isNotEmpty
                                         ? Image.network(
                                             displayImage,
@@ -236,9 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 12),
 
-                  // -------------------------------------------------------
-                  // 2. ABOUT ME (BIO) & INTERESTS
-                  // -------------------------------------------------------
+                  // 2. ABOUT ME & INTERESTS
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -268,7 +258,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         const Divider(),
                         const SizedBox(height: 10),
 
-                        // ✅ INTERESTS SECTION (ของจริง)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -279,7 +268,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                 const Text("Interests", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               ],
                             ),
-                            // ✅ ปุ่ม Edit Interest
                             IconButton(
                               icon: const Icon(Icons.edit, size: 20, color: Colors.grey),
                               onPressed: () {
@@ -289,8 +277,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        
-                        // Loop แสดง Interest Chips
                         if (interests.isEmpty)
                           const Text("No interests added yet.", style: TextStyle(color: Colors.grey))
                         else
@@ -307,9 +293,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 12),
 
-                  // -------------------------------------------------------
                   // 3. MY PHOTOS
-                  // -------------------------------------------------------
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     padding: const EdgeInsets.all(20),
@@ -383,7 +367,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
 
                   // -------------------------------------------------------
-                  // 4. SETTINGS
+                  // 4. SETTINGS (Menu Links)
                   // -------------------------------------------------------
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -394,23 +378,36 @@ class _ProfilePageState extends State<ProfilePage> {
                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
                     ),
                     child: Column(
-                         children: [
-                        // ✅ 1. Account Settings -> ไปหน้า SettingsPage
-                        _buildSettingsTile(Icons.person_outline, "Account Settings", onTap: () {
-                           Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage())); 
-                           // ⚠️ อย่าลืม import 'settings_page.dart'; ข้างบนด้วยนะครับ
-                        }),
+                      children: [
+                        // Account Settings
+                        _buildSettingsTile(
+                          Icons.person_outline, 
+                          "Account Settings", 
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage()));
+                          }
+                        ),
                         
-                        // ✅ 2. Privacy & Safety -> (ตัวอย่าง) โชว์ Dialog หรือไปหน้าใหม่
-                        _buildSettingsTile(Icons.lock_outline, "Privacy & Safety", onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Privacy Settings coming soon!")));
-                        }),
+                        // Privacy
+                        _buildSettingsTile(
+                          Icons.lock_outline, 
+                          "Privacy & Safety", 
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacySettingsPage()));
+                          }
+                        ),
                         
-                        // ✅ 3. Notifications -> (ตัวอย่าง) โชว์ Dialog หรือไปหน้าใหม่
-                        _buildSettingsTile(Icons.notifications_outlined, "Notifications", onTap: () {
-                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Notification Settings coming soon!")));
-                        }),
+                        // Notifications
+                        _buildSettingsTile(
+                          Icons.notifications_outlined, 
+                          "Notifications", 
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationSettingsPage()));
+                          }
+                        ),
+
                         const Divider(),
+                        
                         InkWell(
                           onTap: () async {
                             await _authService.signOut();
@@ -426,12 +423,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
 
                   // -------------------------------------------------------
-                  // 🛠️ DEV OPTIONS
+                  // 🛠️ DEV OPTIONS (เอาคืนมาให้ครบแล้วครับ!)
                   // -------------------------------------------------------
                   const SizedBox(height: 10),
                   const Center(child: Text("Developer Options", style: TextStyle(color: Colors.grey, fontSize: 12))),
                   const SizedBox(height: 10),
                   
+                  // 1. ปุ่มเสกคน
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     width: double.infinity,
@@ -445,6 +443,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       },
                     ),
                   ),
+
+                  // 2. ปุ่มโกงให้คนชอบเรา
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     width: double.infinity,
@@ -454,10 +454,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       label: const Text("CHEAT: Everyone Likes Me ❤️", style: TextStyle(color: Colors.white)),
                       onPressed: () async {
                         await _userService.cheatMakeEveryoneLikeMe();
-                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("💖 Done!")));
+                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("💖 Done! Everyone loves you.")));
                       },
                     ),
                   ),
+
+                  // 3. ปุ่มโกง Force Match (อาจจะยังไม่มีฟังก์ชันนี้ใน User Service แต่ใส่โครงไว้ให้ก่อน)
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     width: double.infinity,
@@ -466,8 +468,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       icon: const Icon(Icons.chat, color: Colors.white),
                       label: const Text("CHEAT: Force Match All", style: TextStyle(color: Colors.white)),
                       onPressed: () {
-                        // await _userService.cheatForceMatchWithEveryone();
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("✅ Chats created!")));
+                        // ถ้ายังไม่ได้เขียนฟังก์ชันนี้ใน UserService ก็ comment ไว้ก่อน หรือใส่ ScaffoldMessenger หลอกๆ
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("⚠️ Feature coming soon in UserService")));
                       },
                     ),
                   ),
@@ -483,7 +485,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // --- Helper Widgets ---
 
-    // ✅ Widget สำหรับแสดง Avatar สีเทา (เมื่อไม่มีรูป)
     Widget _buildDefaultAvatar() {
       return Container(
         color: Colors.grey[200],

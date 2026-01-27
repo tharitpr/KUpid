@@ -43,18 +43,19 @@ class _ActivityPageState extends State<ActivityPage> {
       "description": "Run for health around the beautiful campus! Choose 5km or 10km routes. Part of the proceeds support scholarships for students in need."
     },
   ];
+  final Color _bgGrey = const Color(0xFFF9FAFB);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: _bgGrey,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: _bgGrey,
         title: const Text(
-          "University Activities",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          "Activities",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold , fontSize: 28  ),
         ),
-        centerTitle: true,
+        centerTitle: false,
         automaticallyImplyLeading: false,
       ),
       body: Container(

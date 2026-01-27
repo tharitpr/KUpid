@@ -14,7 +14,7 @@ class ChatListPage extends StatefulWidget {
 class _ChatListPageState extends State<ChatListPage> {
   final ChatService _chatService = ChatService();
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
-
+  
   // --- 🕒 ฟังก์ชันแปลงเวลาให้สวยงาม ---
   String _formatTimestamp(Timestamp? timestamp) {
     if (timestamp == null) return "";
@@ -36,13 +36,14 @@ class _ChatListPageState extends State<ChatListPage> {
       return "${date.day}/${date.month}";
     }
   }
+  final Color _bgGrey = const Color(0xFFF9FAFB);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: _bgGrey,
         elevation: 0,
         centerTitle: false,
         automaticallyImplyLeading: false,
@@ -52,6 +53,7 @@ class _ChatListPageState extends State<ChatListPage> {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
+        
         stream: _chatService.getChatRooms(), 
         builder: (context, snapshot) {
           

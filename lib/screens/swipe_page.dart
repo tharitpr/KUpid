@@ -382,19 +382,23 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.favorite, color: Colors.green, size: 28),
+        
           const SizedBox(width: 8),
           RichText(
             text: const TextSpan(
               children: [
-                TextSpan(text: "KU", style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold)),
-                TextSpan(text: "pid", style: TextStyle(color: Colors.green, fontSize: 22, fontWeight: FontWeight.bold)),
+                TextSpan(text: "KU", style: TextStyle(color: Colors.green, fontSize: 34, fontWeight: FontWeight.bold)),
+                TextSpan(text: "pid", style: TextStyle(color: Colors.black, fontSize: 32, fontWeight: FontWeight.bold)),
               ],
+          
             ),
           ),
+          const SizedBox(width: 4),
+          const Icon(Icons.favorite, color: Colors.red, size: 22),
+         
         ],
       ),
-      centerTitle: true,
+      centerTitle: false,
       actions: [
         IconButton(
           icon: const Icon(Icons.tune, color: Colors.grey),
