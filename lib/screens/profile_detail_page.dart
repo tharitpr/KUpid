@@ -52,9 +52,17 @@ class ProfileDetailPage extends StatelessWidget {
     // เตรียมข้อมูล
     final String imageUrl = profileData['image'] ?? "";
     final String name = profileData['name'] ?? "Unknown";
-    final String age = profileData['age'] != null ? ", ${profileData['age']}" : "";
+    
+    // ✅ เปลี่ยนจาก Age เป็น Year
+    final String year = profileData['year'] ?? "";
+    final String displayYear = year.isNotEmpty ? ", $year" : "";
+
     final String faculty = profileData['faculty'] ?? "Kasetsart University";
     final String bio = profileData['bio'] ?? "No bio available.";
+    
+    // ✅ ดึงข้อมูลกิจกรรม
+    final List<dynamic> joinedActivities = profileData['joinedActivities'] ?? [];
+
     final List<dynamic> interests = profileData['interests'] ?? [];
     final List<dynamic> galleryPhotos = profileData['galleryPhotos'] ?? [];
 
@@ -80,7 +88,6 @@ class ProfileDetailPage extends StatelessWidget {
                       ? Image.network(
                           imageUrl,
                           fit: BoxFit.cover,
-                          // ✅ เพิ่ม Loading state
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
                             return Center(
@@ -92,7 +99,6 @@ class ProfileDetailPage extends StatelessWidget {
                               ),
                             );
                           },
-                          // ✅ แก้ Error ให้มี Placeholder สวยๆ
                           errorBuilder: (c, e, s) => Container(
                             color: Colors.grey[300],
                             child: const Center(child: Icon(Icons.image_not_supported, size: 50, color: Colors.grey)),
@@ -114,12 +120,12 @@ class ProfileDetailPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ชื่อและอายุ
+                      // ชื่อและชั้นปี
                       Row(
                         children: [
                           Flexible(
                             child: Text(
-                              "$name$age",
+                              "$name$displayYear", // ✅ แสดงชั้นปี
                               style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.black87),
                             ),
                           ),
@@ -143,6 +149,55 @@ class ProfileDetailPage extends StatelessWidget {
                         ],
                       ),
                       
+                      // ✅ แสดงกิจกรรมที่กำลังเข้าร่วม (เด่นชัดกว่า Card เล็กน้อย)
+                      if (joinedActivities.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF006400).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFF006400).withOpacity(0.3)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Event Schedule (กิจกรรมที่เข้าร่วม):",
+                                style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              // ใช้ Wrap เพื่อปูเรียงกันสวยๆ
+                              Wrap(
+                                spacing: 8, // ระยะห่างแนวนอน
+                                runSpacing: 8, // ระยะห่างแนวตั้ง
+                                children: joinedActivities.map((activity) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF006400),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.event, color: Colors.white, size: 14),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          "$activity",
+                                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
                       const SizedBox(height: 24),
                       const Divider(),
                       const SizedBox(height: 24),
@@ -182,7 +237,7 @@ class ProfileDetailPage extends StatelessWidget {
                         const SizedBox(height: 24),
                       ],
 
-                      // ✅ GALLERY SECTION
+                      // GALLERY SECTION
                       if (galleryPhotos.isNotEmpty) ...[
                         const Divider(),
                         const SizedBox(height: 24),
@@ -198,6 +253,7 @@ class ProfileDetailPage extends StatelessWidget {
                           ],
                         ),
                         
+                        const SizedBox(height: 12),
                         
                         // Grid แสดงรูป
                         GridView.builder(
@@ -227,7 +283,6 @@ class ProfileDetailPage extends StatelessWidget {
                                     child: Image.network(
                                       imgUrl,
                                       fit: BoxFit.cover,
-                                      // ✅ เพิ่มตัวกัน Error ให้รูปเล็กด้วย
                                       errorBuilder: (c, e, s) => const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
                                       loadingBuilder: (c, child, progress) {
                                         if (progress == null) return child;
@@ -248,9 +303,7 @@ class ProfileDetailPage extends StatelessWidget {
             ],
           ),
 
-          // -----------------------------------------------------------
-          // ✅ 3. ปุ่ม NOPE / LIKE แบบเดิม (FloatingActionButton.extended)
-          // -----------------------------------------------------------
+          // 3. ปุ่ม NOPE / LIKE แบบเดิม
           Positioned(
             bottom: 30,
             left: 0,

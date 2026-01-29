@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'main_layout.dart'; 
 
+
 class SetupInterestsPage extends StatefulWidget {
   const SetupInterestsPage({super.key});
 
@@ -100,7 +101,7 @@ class _SetupInterestsPageState extends State<SetupInterestsPage> {
         // ไปหน้า Main Layout (เข้าแอปจริง)
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const MainLayout()),
+          MaterialPageRoute(builder: (context) => const MainLayout(showTutorial: true)),
           (route) => false,
         );
       }

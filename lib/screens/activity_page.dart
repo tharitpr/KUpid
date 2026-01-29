@@ -1,4 +1,10 @@
+// lib/screens/activity_page.dart
+
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+import 'create_activity_page.dart';
 
 class ActivityPage extends StatefulWidget {
   const ActivityPage({super.key});
@@ -8,232 +14,340 @@ class ActivityPage extends StatefulWidget {
 }
 
 class _ActivityPageState extends State<ActivityPage> {
-  // --- Mock Data: เพิ่ม field 'description' เพื่อใช้โชว์ใน popup ---
-  final List<Map<String, String>> activities = [
-    {
-      "title": "KU Fair 2026",
-      "date": "Feb 2-10, 2026",
-      "location": "Kasetsart University Campus",
-      "image": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop",
-      "category": "Festival",
-      "description": "The biggest festival of the year! Meet 500+ vendors, food stalls, and enjoy concerts by famous artists. Perfect for networking and experiencing campus life!"
-    },
-    {
-      "title": "Engineering Open House",
-      "date": "Mar 15, 2026 | 09:00 - 16:00",
-      "location": "Engineering Building",
-      "image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2070&auto=format&fit=crop",
-      "category": "Academic",
-      "description": "Welcome to the Engineering Faculty! Tour our state-of-the-art laboratories, meet senior students, and explore exciting AI robotics projects."
-    },
-    {
-      "title": "Freshy Night Music Festival",
-      "date": "Mar 20, 2026 | 18:00 onwards",
-      "location": "University Stadium",
-      "image": "https://images.unsplash.com/photo-1459749411177-0473ef716175?q=80&w=2070&auto=format&fit=crop",
-      "category": "Concert",
-      "description": "Amazing welcome concert for freshmen! Get ready to dance with famous bands and musicians. This is the event of the year!"
-    },
-    {
-      "title": "KU Run - Campus Run",
-      "date": "Apr 1, 2026 | 05:00 AM",
-      "location": "Around Campus",
-      "image": "https://images.unsplash.com/photo-1552674605-46d50402f181?q=80&w=2070&auto=format&fit=crop",
-      "category": "Sports",
-      "description": "Run for health around the beautiful campus! Choose 5km or 10km routes. Part of the proceeds support scholarships for students in need."
-    },
-  ];
   final Color _bgGrey = const Color(0xFFF9FAFB);
+  final currentUser = FirebaseAuth.instance.currentUser; // ✅ ดึง User ปัจจุบันมารรอไว้เช็ค
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _bgGrey,
       appBar: AppBar(
-        backgroundColor: _bgGrey,
+        backgroundColor: Colors.white,
         title: const Text(
           "Activities",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold , fontSize: 28  ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 28),
         ),
         centerTitle: false,
         automaticallyImplyLeading: false,
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFE5F2E4),
-              Color(0xFFE5F2E4),
-              Color(0xFFF2F1E4),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: activities.length,
-          itemBuilder: (context, index) {
-            final item = activities[index];
-            return ActivityCard(item: item);
-          },
-        ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreateActivityPage()),
+          );
+        },
+        backgroundColor: const Color(0xFF006400),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text("Create Activity", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('activities')
+            .where('status', isEqualTo: 'approved')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: Color(0xFF006400)));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.event_busy, size: 60, color: Colors.grey[400]),
+                  const SizedBox(height: 10),
+                  const Text("No activities yet.", style: TextStyle(color: Colors.grey, fontSize: 16)),
+                ],
+              ),
+            );
+          }
+
+          var activities = snapshot.data!.docs;
+
+          return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+            itemCount: activities.length,
+            itemBuilder: (context, index) {
+              var data = activities[index].data() as Map<String, dynamic>;
+
+              // ✅ 1. เช็คว่า User ปัจจุบันอยู่ใน list participants หรือยัง?
+              List<dynamic> participants = data['participants'] ?? [];
+              bool isJoined = false;
+              if (currentUser != null) {
+                // เช็คว่ามี uid ของเราอยู่ใน array หรือไม่
+                isJoined = participants.any((p) => p['uid'] == currentUser!.uid);
+              }
+
+              Map<String, String> item = {
+                "id": activities[index].id,
+                "title": data['title'] ?? "Untitled",
+                "date": _formatDate(data['dateTime']),
+                "location": data['location'] ?? "Unknown",
+                "image": data['image'] ?? "https://via.placeholder.com/400",
+                "category": data['category'] ?? "General",
+                "description": data['description'] ?? "",
+                "organization": data['organization'] ?? "",
+              };
+
+              // ✅ ส่งสถานะ isJoined ไปที่ Card
+              return ActivityCard(item: item, isJoined: isJoined);
+            },
+          );
+        },
       ),
     );
   }
+
+  String _formatDate(dynamic timestamp) {
+    if (timestamp == null) return "";
+    if (timestamp is Timestamp) {
+      DateTime date = timestamp.toDate();
+      return DateFormat('MMM d, yyyy | HH:mm').format(date);
+    }
+    return timestamp.toString();
+  }
 }
 
-// --- Widget แยก: การ์ดกิจกรรม ---
-class ActivityCard extends StatelessWidget {
+// --- ActivityCard ---
+class ActivityCard extends StatefulWidget {
   final Map<String, String> item;
+  final bool isJoined; // ✅ รับค่าสถานะการเข้าร่วม
 
-  const ActivityCard({super.key, required this.item});
+  const ActivityCard({
+    super.key, 
+    required this.item, 
+    required this.isJoined // ✅ Required
+  });
 
-  // --- ฟังก์ชันแสดง Pop-up (Modal Bottom Sheet) ---
+  @override
+  State<ActivityCard> createState() => _ActivityCardState();
+}
+
+class _ActivityCardState extends State<ActivityCard> {
+  bool _isJoining = false;
+
+  Future<void> _handleJoin(BuildContext context) async {
+    setState(() => _isJoining = true);
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final userData = userDoc.data();
+
+      String studentId = userData?['studentId'] ?? "Unknown";
+      String gender = userData?['gender'] ?? "Unknown";
+
+      await FirebaseFirestore.instance.collection('activities').doc(widget.item['id']).update({
+        'participants': FieldValue.arrayUnion([
+          {
+            'uid': user.uid,
+            'studentId': studentId,
+            'gender': gender,
+            'joinedAt': Timestamp.now(),
+          }
+        ])
+      });
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+        'joinedActivities': FieldValue.arrayUnion([widget.item['title']]),
+      });
+
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 10),
+                Expanded(child: Text("ลงทะเบียน '${widget.item['title']}' เรียบร้อย!")),
+              ],
+            ),
+            backgroundColor: const Color(0xFF1DB954),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error joining: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
+    } finally {
+      if (mounted) setState(() => _isJoining = false);
+    }
+  }
+
   void _showActivityDetail(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // ให้ขยายเต็มจอได้ถ้ายาว
-      backgroundColor: Colors.transparent, // เพื่อให้เห็นมุมโค้ง
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.85, // สูง 85% ของหน้าจอ
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-          ),
-          child: Column(
-            children: [
-              // 1. Header Image + Close Button
-              Stack(
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.85,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: Column(
                 children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-                    child: Image.network(
-                      item["image"]!,
-                      height: 250,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+                        child: Image.network(
+                          widget.item["image"]!,
+                          height: 250,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 250,
+                            color: Colors.grey[300],
+                            child: const Center(child: Icon(Icons.broken_image)),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 15,
+                        right: 15,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.black.withOpacity(0.5),
+                          child: IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1DB954).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  widget.item["category"]!,
+                                  style: const TextStyle(
+                                    color: Color(0xFF1DB954),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
+                              // ✅ Badge แสดงในหน้า Detail ด้วย ถ้าลงทะเบียนแล้ว
+                              if (widget.isJoined)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: Colors.grey),
+                                  ),
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.check, size: 16, color: Colors.green),
+                                      SizedBox(width: 4),
+                                      Text("Registered", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            widget.item["title"]!,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0C2F1C),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildInfoRow(Icons.calendar_month, widget.item["date"]!),
+                          const SizedBox(height: 8),
+                          _buildInfoRow(Icons.location_on, widget.item["location"]!),
+                          const SizedBox(height: 20),
+                          const Divider(),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "รายละเอียดกิจกรรม",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            widget.item["description"] ?? "ไม่มีรายละเอียดเพิ่มเติม",
+                            style: TextStyle(fontSize: 16, color: Colors.grey[700], height: 1.6),
+                          ),
+                          const SizedBox(height: 80),
+                        ],
+                      ),
                     ),
                   ),
-                  Positioned(
-                    top: 15,
-                    right: 15,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.black.withValues(alpha: 0.5),
-                      child: IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
+                  
+                  // ✅ ปุ่มด้านล่าง: เช็คสถานะ isJoined
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
+                      ],
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        // ⚠️ ถ้า isJoined เป็น true -> ปุ่มกดไม่ได้ (null)
+                        onPressed: (widget.isJoined || _isJoining) 
+                          ? null 
+                          : () {
+                              setModalState(() => _isJoining = true);
+                              _handleJoin(context).then((_) {
+                                if(mounted) setModalState(() => _isJoining = false);
+                              });
+                            }, 
+                        style: ElevatedButton.styleFrom(
+                          // เปลี่ยนสีปุ่ม: ถ้าลงแล้วเป็นสีเทา, ถ้ายังเป็นสีเขียว
+                          backgroundColor: widget.isJoined ? Colors.grey[300] : const Color(0xFF1DB954),
+                          disabledBackgroundColor: Colors.grey[300], // สีตอนกดไม่ได้
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          elevation: 0,
+                        ),
+                        child: _isJoining 
+                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : Text(
+                              // เปลี่ยนข้อความตามสถานะ
+                              widget.isJoined ? "Registered" : "Confirm Participation",
+                              style: TextStyle(
+                                color: widget.isJoined ? Colors.grey[600] : Colors.white, 
+                                fontSize: 18, 
+                                fontWeight: FontWeight.bold
+                              ),
+                            ),
                       ),
                     ),
                   ),
                 ],
               ),
-
-              // 2. Content Details (Scrollable)
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Tag
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1DB954).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          item["category"]!,
-                          style: const TextStyle(
-                            color: Color(0xFF1DB954),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      
-                      // Title
-                      Text(
-                        item["title"]!,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0C2F1C),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Info Rows
-                      _buildInfoRow(Icons.calendar_month, item["date"]!),
-                      const SizedBox(height: 8),
-                      _buildInfoRow(Icons.location_on, item["location"]!),
-                      
-                      const SizedBox(height: 20),
-                      const Divider(),
-                      const SizedBox(height: 20),
-
-                      // Description
-                      const Text(
-                        "รายละเอียดกิจกรรม",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        item["description"] ?? "ไม่มีรายละเอียดเพิ่มเติม", // ใช้ข้อมูลใหม่
-                        style: TextStyle(fontSize: 16, color: Colors.grey[700], height: 1.6),
-                      ),
-                      const SizedBox(height: 80), // เผื่อที่ให้ปุ่มด้านล่าง
-                    ],
-                  ),
-                ),
-              ),
-
-              // 3. Fixed Join Button at Bottom
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5)),
-                  ],
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context); // ปิด popup
-                      // Show Success Message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              const Icon(Icons.check_circle, color: Colors.white),
-                              const SizedBox(width: 10),
-                              Text("ลงทะเบียนเข้าร่วม '${item['title']}' สำเร็จ!"),
-                            ],
-                          ),
-                          backgroundColor: const Color(0xFF1DB954),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1DB954),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      "ยืนยันการเข้าร่วม",
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            );
+          }
         );
       },
     );
@@ -260,7 +374,7 @@ class ActivityCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -269,13 +383,12 @@ class ActivityCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. ส่วนรูปภาพ
           Stack(
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                 child: Image.network(
-                  item["image"]!,
+                  widget.item["image"]!,
                   height: 180,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -294,50 +407,73 @@ class ActivityCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: Colors.white.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    item["category"]!,
+                    widget.item["category"]!,
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0C2F1C)),
                   ),
                 ),
               ),
+              
+              // ✅ Badge "Registered" มุมซ้ายบนของการ์ด
+              if (widget.isJoined)
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.green, // พื้นหลังสีเขียวทึบ
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)],
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.white, size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          "Registered",
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
 
-          // 2. ส่วนเนื้อหาการ์ด (ย่อ)
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item["title"]!,
-                  maxLines: 1, // ตัดคำถ้ายาวเกิน
+                  widget.item["title"]!,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0C2F1C)),
                 ),
                 const SizedBox(height: 10),
-                _buildInfoRow(Icons.calendar_month, item["date"]!),
+                _buildInfoRow(Icons.calendar_month, widget.item["date"]!),
                 const SizedBox(height: 6),
-                _buildInfoRow(Icons.location_on, item["location"]!),
-                
+                _buildInfoRow(Icons.location_on, widget.item["location"]!),
                 const SizedBox(height: 16),
                 
-                // ปุ่มดูรายละเอียด (กดแล้วเรียกฟังก์ชัน popup)
                 SizedBox(
                   width: double.infinity,
                   height: 45,
-                  child: OutlinedButton( // เปลี่ยนเป็น Outlined เพื่อให้ดูเบากว่าปุ่ม Join ใน Popup
+                  child: OutlinedButton(
                     onPressed: () => _showActivityDetail(context),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0xFF1DB954), width: 1.5),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text(
-                      "ดูรายละเอียด",
-                      style: TextStyle(color: Color(0xFF1DB954), fontSize: 16, fontWeight: FontWeight.bold),
+                    // เปลี่ยนข้อความปุ่มหน้าการ์ดด้วยก็ได้ ถ้าต้องการ
+                    child: Text(
+                      widget.isJoined ? "See Details ( Registered )" : "See Details",
+                      style: const TextStyle(color: Color(0xFF1DB954), fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

@@ -15,10 +15,7 @@ class ProfileCard extends StatelessWidget {
     // เตรียมข้อมูล (ใส่ Default กันค่า Null)
     final String name = profileData['name'] ?? "Unknown";
     
-    // ❌ เอา Age ออก
-    // final String age = profileData['age'] != null ? ", ${profileData['age']}" : "";
-    
-    // ✅ ใส่ Year เข้าไปแทน
+    // ✅ ใส่ Year
     final String year = profileData['year'] ?? "";
     final String displayYear = year.isNotEmpty ? ", $year" : "";
 
@@ -26,6 +23,9 @@ class ProfileCard extends StatelessWidget {
     final String bio = profileData['bio'] ?? "";
     final String? gender = profileData['gender']; 
     
+    // ✅ ดึงข้อมูลกิจกรรมที่กำลังจะไป (ถ้ามี)
+    final List<dynamic> joinedActivities = profileData['joinedActivities'] ?? [];
+
     // ดึง Tags (ถ้าไม่มีให้ Mock ขึ้นมาโชว์ก่อน)
     final List<dynamic> interests = profileData['interests'] ?? ["Music", "Travel", "Cat Lover"]; 
 
@@ -49,7 +49,7 @@ class ProfileCard extends StatelessWidget {
           fit: StackFit.expand, 
           children: [
             // ---------------------------------------------------
-            // 1. ส่วนแสดงรูปภาพ (พร้อม Hero Animation)
+            // 1. ส่วนแสดงรูปภาพ
             // ---------------------------------------------------
             Hero(
               tag: 'profile_image_${profileData['uid'] ?? profileData['name']}', 
@@ -110,12 +110,12 @@ class ProfileCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 3.1 ชื่อ + ชั้นปี (แทนอายุ) + เพศ + ไอคอนยืนยัน
+                  // 3.1 ชื่อ + ชั้นปี + เพศ + ไอคอนยืนยัน
                   Row(
                     children: [
                       Flexible(
                         child: Text(
-                          "$name$displayYear", // ✅ แสดงชั้นปีตรงนี้
+                          "$name$displayYear", 
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 28,
@@ -162,13 +162,46 @@ class ProfileCard extends StatelessWidget {
                     ],
                   ),
 
-                  // 3.3 เส้นคั่น
+                  // ✅ 3.3 แสดง Current Activity (ถ้ามี)
+                  if (joinedActivities.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    // ใช้ SingleChildScrollView แนวนอน เผื่อกิจกรรมเยอะจะได้เลื่อนได้ ไม่ตกขอบ
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: joinedActivities.map((activity) {
+                          return Container(
+                            margin: const EdgeInsets.only(right: 6), // เว้นระยะห่างแต่ละป้าย
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF006400).withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white30),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.event_available, color: Colors.white, size: 12),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "$activity", // โชว์ชื่อกิจกรรม
+                                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+
+                  // 3.4 เส้นคั่น
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: Divider(color: Colors.white.withOpacity(0.3), height: 1),
                   ),
 
-                  // 3.4 Interest Tags
+                  // 3.5 Interest Tags
                   if (interests.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 10),
@@ -192,7 +225,7 @@ class ProfileCard extends StatelessWidget {
                       ),
                     ),
 
-                  // 3.5 Bio
+                  // 3.6 Bio
                   if (bio.isNotEmpty)
                     Text(
                       bio,

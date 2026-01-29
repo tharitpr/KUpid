@@ -11,8 +11,8 @@ import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import 'edit_profile_page.dart'; 
 import 'setup_interests_page.dart';
-import 'privacy_settings_page.dart'; // Import Privacy
-import 'notification_settings_page.dart'; // Import Notification
+import 'privacy_settings_page.dart'; 
+import 'notification_settings_page.dart'; 
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -93,6 +93,62 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     }
 
+    // --- ✅ ฟังก์ชันยกเลิกกิจกรรม ---
+    Future<void> _leaveActivity(String activityName) async {
+      bool confirm = await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Cancel Activity"),
+          content: Text("Do you want to cancel joining '$activityName'?"),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("No")),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true), 
+              child: const Text("Yes, Cancel", style: TextStyle(color: Colors.red))
+            ),
+          ],
+        ),
+      ) ?? false;
+
+      if (!confirm) return;
+
+      try {
+        // 1. ลบออกจาก Profile เรา
+        await FirebaseFirestore.instance.collection('users').doc(currentUser!.uid).update({
+          'joinedActivities': FieldValue.arrayRemove([activityName])
+        });
+
+        // 2. ลบออกจาก Activity Document (อันนี้ยากหน่อยเพราะต้องหา Doc ID จากชื่อ)
+        // เพื่อความง่ายใน MVP เราอาจจะลบแค่ฝั่ง User ก่อนเพื่อให้หน้า UI อัปเดต
+        // แต่ถ้าจะเอาสมบูรณ์ ต้อง query หา activity ที่มีชื่อนี้ แล้วลบ uid เราออกจาก participants array
+        
+        // (Optional: Advanced)
+        final activityQuery = await FirebaseFirestore.instance
+            .collection('activities')
+            .where('title', isEqualTo: activityName)
+            .limit(1)
+            .get();
+
+        if (activityQuery.docs.isNotEmpty) {
+           final activityDoc = activityQuery.docs.first;
+           
+           // ต้องดึง array เดิมมา filter เอาตัวเราออก (เพราะใน participants เก็บเป็น Map {uid, gender...})
+           List<dynamic> participants = activityDoc['participants'] ?? [];
+           participants.removeWhere((p) => p['uid'] == currentUser!.uid);
+
+           await FirebaseFirestore.instance.collection('activities').doc(activityDoc.id).update({
+             'participants': participants
+           });
+        }
+
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Activity cancelled.")));
+
+      } catch (e) {
+        debugPrint("Error leaving activity: $e");
+        if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed to cancel.")));
+      }
+    }
+
     @override
     Widget build(BuildContext context) {
       return Scaffold(
@@ -103,14 +159,7 @@ class _ProfilePageState extends State<ProfilePage> {
           title: const Text("My Profile", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 28)),
           centerTitle: false,
           automaticallyImplyLeading: false,
-          actions: [
-            /*IconButton(
-              icon: const Icon(Icons.settings, color: Colors.white),
-              onPressed: () {
-                 Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
-              },
-            ),*/
-          ],
+          actions: [],
         ),
         body: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance.collection('users').doc(currentUser!.uid).snapshots(),
@@ -128,11 +177,18 @@ class _ProfilePageState extends State<ProfilePage> {
             String displayName = userData['name'] ?? "User";
             String displayImage = userData['photoUrl'] ?? "";
             String faculty = userData['faculty'] ?? "Faculty";
-            String age = userData['age'] != null ? ", ${userData['age']}" : "";
+            
+            // ใช้ Year แทน Age
+            String year = userData['year'] ?? ""; 
+            String displayYear = year.isNotEmpty ? ", $year" : "";
+
             String bio = userData['bio'] ?? "No bio yet...";
             String studentId = userData['studentId'] ?? "-";
             List<dynamic> galleryPhotos = userData['galleryPhotos'] ?? [];
             List<dynamic> interests = userData['interests'] ?? [];
+            
+            // ✅ ดึงรายการกิจกรรม
+            List<dynamic> joinedActivities = userData['joinedActivities'] ?? [];
 
             return SingleChildScrollView(
               child: Column(
@@ -190,7 +246,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("$displayName$age", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87), overflow: TextOverflow.ellipsis),
+                                  Text("$displayName$displayYear", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87), overflow: TextOverflow.ellipsis),
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
@@ -207,6 +263,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                       Text("ID: $studentId", style: TextStyle(color: Colors.grey[600], fontSize: 14)),
                                     ],
                                   ),
+                                  
+
                                   const SizedBox(height: 12),
                                   // Stats Row
                                   Row(
@@ -228,6 +286,129 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 12),
 
+                  // -------------------------------------------------------------
+                  // ส่วนแสดง My Activities (UI ปรับปรุงใหม่)
+                  // -------------------------------------------------------------
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2))
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 1. หัวข้อ
+                        Row(
+                          children: [
+                            Icon(Icons.event_note, color: _primaryGreen, size: 24),
+                            const SizedBox(width: 8),
+                            const Text("My Activities",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 2. เนื้อหา (รายการกิจกรรม)
+                        if (joinedActivities.isEmpty)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey[200]!),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(Icons.event_busy, size: 40, color: Colors.grey[300]),
+                                const SizedBox(height: 8),
+                                Text("You haven't joined any activities.",
+                                    style: TextStyle(color: Colors.grey[500], fontSize: 14)),
+                              ],
+                            ),
+                          )
+                        else
+                          Column(
+                            children: joinedActivities.map((activityName) {
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12), // เว้นระยะระหว่างการ์ด
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.grey[200]!), // เส้นขอบบางๆ
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: ListTile(
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  // ไอคอนด้านหน้า (Leading)
+                                  leading: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: _primaryGreen.withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(Icons.confirmation_number,
+                                        color: _primaryGreen, size: 20),
+                                  ),
+                                  // ชื่อกิจกรรม
+                                  title: Text(
+                                    activityName,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                        color: Colors.black87),
+                                  ),
+                                  // ปุ่มยกเลิก (Trailing)
+                                  trailing: InkWell(
+                                    onTap: () => _leaveActivity(activityName),
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Container(
+                                      padding:
+                                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.withOpacity(0.08),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: Colors.red.withOpacity(0.2)),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.exit_to_app, size: 14, color: Colors.red),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            "Leave",
+                                            style: TextStyle(
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   // 2. ABOUT ME & INTERESTS
                   Container(
                     width: double.infinity,
@@ -367,7 +548,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
 
                   // -------------------------------------------------------
-                  // 4. SETTINGS (Menu Links)
+                  // 4. SETTINGS
                   // -------------------------------------------------------
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -379,35 +560,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     child: Column(
                       children: [
-                        // Account Settings
-                        _buildSettingsTile(
-                          Icons.person_outline, 
-                          "Account Settings", 
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage()));
-                          }
-                        ),
-                        
-                        // Privacy
-                        _buildSettingsTile(
-                          Icons.lock_outline, 
-                          "Privacy & Safety", 
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacySettingsPage()));
-                          }
-                        ),
-                        
-                        // Notifications
-                        _buildSettingsTile(
-                          Icons.notifications_outlined, 
-                          "Notifications", 
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationSettingsPage()));
-                          }
-                        ),
-
+                        _buildSettingsTile(Icons.person_outline, "Account Settings", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage()))),
+                        _buildSettingsTile(Icons.lock_outline, "Privacy & Safety", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacySettingsPage()))),
+                        _buildSettingsTile(Icons.notifications_outlined, "Notifications", onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationSettingsPage()))),
                         const Divider(),
-                        
                         InkWell(
                           onTap: () async {
                             await _authService.signOut();
@@ -422,15 +578,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
 
-                  // -------------------------------------------------------
-                  // 🛠️ DEV OPTIONS (เอาคืนมาให้ครบแล้วครับ!)
-                  // -------------------------------------------------------
+                  // Dev Options
                   const SizedBox(height: 10),
                   const Center(child: Text("Developer Options", style: TextStyle(color: Colors.grey, fontSize: 12))),
                   const SizedBox(height: 10),
                   
-                  // 1. ปุ่มเสกคน
-                  Container(
+               /*   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -442,9 +595,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("✅ Generated 10 Mock Users!")));
                       },
                     ),
-                  ),
+                  ),*/
 
-                  // 2. ปุ่มโกงให้คนชอบเรา
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     width: double.infinity,
@@ -459,21 +611,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
 
-                  // 3. ปุ่มโกง Force Match (อาจจะยังไม่มีฟังก์ชันนี้ใน User Service แต่ใส่โครงไว้ให้ก่อน)
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, padding: const EdgeInsets.symmetric(vertical: 12)),
-                      icon: const Icon(Icons.chat, color: Colors.white),
-                      label: const Text("CHEAT: Force Match All", style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        // ถ้ายังไม่ได้เขียนฟังก์ชันนี้ใน UserService ก็ comment ไว้ก่อน หรือใส่ ScaffoldMessenger หลอกๆ
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("⚠️ Feature coming soon in UserService")));
-                      },
-                    ),
-                  ),
-                  
                   const SizedBox(height: 40),
                 ],
               ),
@@ -527,4 +664,4 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Text(label, style: TextStyle(color: _primaryGreen, fontWeight: FontWeight.w600, fontSize: 13)),
       );
     }
-  }
+}

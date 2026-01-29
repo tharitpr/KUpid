@@ -7,9 +7,17 @@ import 'swipe_page.dart';
 import 'activity_page.dart';
 import 'chat_list_page.dart'; 
 import 'profile_page.dart'; 
+// ✅ นำเข้า Widget สอนเล่น (ตรวจสอบ path ให้ถูกต้องนะครับ)
+import '../widgets/app_tutorial_dialog.dart'; 
 
 class MainLayout extends StatefulWidget {
-  const MainLayout({super.key});
+  // ✅ 1. เพิ่มตัวแปรรับค่า showTutorial
+  final bool showTutorial;
+
+  const MainLayout({
+    super.key,
+    this.showTutorial = false, // ค่าเริ่มต้นเป็น false (ไม่โชว์)
+  });
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -20,11 +28,26 @@ class _MainLayoutState extends State<MainLayout> {
 
     // รายการหน้าจอที่ Bottom Nav จะสลับไปมาระหว่าง
     final List<Widget> _pages = [
-      const SwipePage(), //Index 0: หน้า Swiping
-      const ActivityPage(),  // Index 1: หน้า Activity
-      const ChatListPage(),  // Index 2: หน้า Chat List
-      const ProfilePage(),   // Index 3: หน้า Profile
+      const SwipePage(),      // Index 0: หน้า Swiping
+      const ActivityPage(),   // Index 1: หน้า Activity
+      const ChatListPage(),   // Index 2: หน้า Chat List
+      const ProfilePage(),    // Index 3: หน้า Profile
     ];
+
+    @override
+    void initState() {
+      super.initState();
+      // ✅ 2. เช็คว่าต้องโชว์ Tutorial ไหม (ทำหลังจากหน้าจอสร้างเสร็จ)
+      if (widget.showTutorial) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showDialog(
+            context: context,
+            barrierDismissible: false, // บังคับให้กดปุ่มใน Dialog เท่านั้น
+            builder: (context) => const AppTutorialDialog(),
+          );
+        });
+      }
+    }
 
     void _onItemTapped(int index) {
       setState(() {
@@ -45,20 +68,46 @@ class _MainLayoutState extends State<MainLayout> {
         // ------------------------------------------------
         // Bottom Navigation Bar (ปรับตามโทนเขียว/ขาว)
         // ------------------------------------------------
-              bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.white, // พื้นหลังสีขาว
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Theme.of(context).primaryColor,
-          unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Discover'),
-            BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Activities'),
-            BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          ],
+        bottomNavigationBar: Container(
+          // เพิ่มเงาให้ดูสวยงามขึ้น
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: NavigationBar( // ใช้ NavigationBar แบบใหม่ (Material 3) จะดูทันสมัยกว่า BottomNavigationBar
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: _onItemTapped,
+            backgroundColor: Colors.white,
+            indicatorColor: const Color(0xFF006400).withOpacity(0.15), // สีพื้นหลังปุ่มที่ถูกเลือก (เขียวอ่อนจางๆ)
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home, color: Color(0xFF006400)),
+                label: 'Discover',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.calendar_today_outlined),
+                selectedIcon: Icon(Icons.calendar_today, color: Color(0xFF006400)),
+                label: 'Activities',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.chat_bubble_outline),
+                selectedIcon: Icon(Icons.chat_bubble, color: Color(0xFF006400)),
+                label: 'Chat',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person, color: Color(0xFF006400)),
+                label: 'Profile',
+              ),
+            ],
+          ),
         ),
       );
     }
-  }
+}
