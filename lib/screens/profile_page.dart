@@ -13,6 +13,7 @@ import 'edit_profile_page.dart';
 import 'setup_interests_page.dart';
 import 'privacy_settings_page.dart'; 
 import 'notification_settings_page.dart'; 
+import 'my_profile_preview_page.dart'; // ✅ Import หน้าใหม่ที่เราเพิ่งสร้าง
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -28,7 +29,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // --- Theme Colors ---
     final Color _primaryGreen = const Color(0xFF006400);
-    final Color _accentGreen = const Color(0xFF32CD32);
+   // final Color _accentGreen = const Color(0xFF32CD32);
     final Color _bgGrey = const Color(0xFFF9FAFB);
 
     bool _isUploading = false;
@@ -194,95 +195,186 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 children: [
                   // 1. HEADER CARD (Avatar + Basic Info)
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(24), bottomRight: Radius.circular(24)),
+                  // ---------------------------------------------------
+                // 1. HEADER CARD (Avatar + Basic Info) - Modern UI
+                // ---------------------------------------------------
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
                     ),
-                    padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
-                    child: Column(
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Avatar
-                            Stack(
-                              children: [
-                                Container(
-                                  width: 100, height: 100,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: displayImage.isNotEmpty
-                                        ? Image.network(
-                                            displayImage,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => _buildDefaultAvatar(),
-                                          )
-                                        : _buildDefaultAvatar(),
-                                  ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.fromLTRB(24, 10, 24, 30),
+                  child: Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // --- 1.1 Avatar Section ---
+                          Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(3), // Border ขาวรอบรูป
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    )
+                                  ],
                                 ),
-                                Positioned(
-                                  bottom: -4, right: -4,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage()));
-                                    },
-                                    child: Container(
-                                      width: 32, height: 32,
-                                      decoration: BoxDecoration(color: _accentGreen, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                                      child: const Icon(Icons.edit, color: Colors.white, size: 16),
+                                child: CircleAvatar(
+                                  radius: 45, // ขนาดรูป
+                                  backgroundColor: Colors.grey[200],
+                                  backgroundImage: displayImage.isNotEmpty
+                                      ? NetworkImage(displayImage)
+                                      : null,
+                                  child: displayImage.isEmpty
+                                      ? Icon(Icons.person, size: 45, color: Colors.grey[400])
+                                      : null,
+                                ),
+                              ),
+                              
+                              // ปุ่ม Edit เล็กๆ ที่มุมรูป
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage()));
+                                },
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: _primaryGreen,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                    boxShadow: [
+                                      BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)
+                                    ],
+                                  ),
+                                  child: const Icon(Icons.edit, color: Colors.white, size: 16),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(width: 20),
+
+                          // --- 1.2 Info Section ---
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Name
+                                Text(
+                                  "$displayName$displayYear",
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.black87,
+                                    height: 1.2,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 6),
+                                
+                                // Faculty
+                                Row(
+                                  children: [
+                                    Icon(Icons.school, size: 16, color: _primaryGreen),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        faculty,
+                                        style: TextStyle(color: Colors.grey[700], fontSize: 14, fontWeight: FontWeight.w500),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                
+                                // Student ID
+                                Row(
+                                  children: [
+                                    Icon(Icons.badge, size: 16, color: _primaryGreen),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      "ID: $studentId",
+                                      style: TextStyle(color: Colors.grey[700], fontSize: 14, fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // --- 1.3 Preview Button (Modern Style) ---
+                      Container(
+                        width: double.infinity,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: _primaryGreen.withOpacity(0.08), // พื้นหลังสีเขียวอ่อนจางๆ
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: _primaryGreen.withOpacity(0.3)),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(15),
+                            onTap: () {
+                              // แพ็คข้อมูลส่งไปหน้า Preview
+                              Map<String, dynamic> myProfileData = {
+                                ...userData,
+                                'uid': currentUser!.uid,
+                                'image': userData['photoUrl'],
+                              };
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MyProfilePreviewPage(profileData: myProfileData),
+                                ),
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.visibility_outlined, color: _primaryGreen),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "Preview Profile Card",
+                                  style: TextStyle(
+                                    color: _primaryGreen,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(width: 20),
-                            // Name & Stats
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("$displayName$displayYear", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87), overflow: TextOverflow.ellipsis),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.school, size: 16, color: Colors.grey[600]),
-                                      const SizedBox(width: 4),
-                                      Expanded(child: Text(faculty, style: TextStyle(color: Colors.grey[600], fontSize: 14), overflow: TextOverflow.ellipsis)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.badge, size: 16, color: Colors.grey[600]),
-                                      const SizedBox(width: 4),
-                                      Text("ID: $studentId", style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-                                    ],
-                                  ),
-                                  
-
-                                  const SizedBox(height: 12),
-                                  // Stats Row
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      _buildStatItem("0", "Matches"),
-                                      _buildStatItem("0", "Likes"),
-                                      _buildStatItem("100%", "Profile"),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
 
                   const SizedBox(height: 12),
 
@@ -622,21 +714,21 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // --- Helper Widgets ---
 
-    Widget _buildDefaultAvatar() {
+   /* Widget _buildDefaultAvatar() {
       return Container(
         color: Colors.grey[200],
         child: const Center(
           child: Icon(Icons.person, size: 50, color: Colors.grey),
         ),
       );
-    }
+    } */
 
-    Widget _buildStatItem(String value, String label) {
+  /*  Widget _buildStatItem(String value, String label) {
       return Column(children: [
         Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _primaryGreen)), 
         Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[500]))
       ]);
-    }
+    }*/
 
     Widget _buildSettingsTile(IconData icon, String title, {required VoidCallback onTap}) {
       return InkWell(
