@@ -3,6 +3,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // ✅ ต้อง Import Firestore ด้วยเพื่อดึงข้อมูลตัวเอง
 
 // Widgets
 import '../widgets/profile_card.dart';
@@ -11,10 +12,11 @@ import '../widgets/swipe_buttons.dart';
 // Services
 import '../services/user_service.dart';
 import '../services/match_service.dart';
+import '../services/matching_algorithm_service.dart'; // ✅ Import Algorithm Service
 
 // Pages
 import 'chat_room_page.dart';
-import 'profile_detail_page.dart'; // ✅ Import หน้า Detail
+import 'profile_detail_page.dart'; 
 
 class SwipePage extends StatefulWidget {
   const SwipePage({super.key});
@@ -27,6 +29,7 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
   
   // Service Instances
   final MatchService _matchService = MatchService();
+  final MatchingAlgorithmService _matchingAlgorithm = MatchingAlgorithmService(); // ✅ ประกาศใช้ Service
   
   // Data Variables
   List<Map<String, dynamic>> _profiles = [];
@@ -64,27 +67,59 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
     _loadProfiles();
   }
 
-  // --- 1. ฟังก์ชันดึงข้อมูลจาก Firebase ---
+  // --- 1. ฟังก์ชันดึงข้อมูลจาก Firebase + ใช้ Algorithm เรียงลำดับ ---
   Future<void> _loadProfiles() async {
     setState(() => _isLoading = true);
     
     try {
+      // A. ดึงข้อมูล User ทั้งหมดมาก่อน
       var users = await UserService().getUsersToSwipe();
       
+      // B. ดึงข้อมูลตัวเราเอง (เพื่อเอามาเทียบความสนใจ)
+      String myUid = FirebaseAuth.instance.currentUser!.uid;
+      var myDoc = await FirebaseFirestore.instance.collection('users').doc(myUid).get();
+      
+      // ถ้าหาข้อมูลตัวเองไม่เจอ ให้หยุดทำงาน (กัน Error)
+      if (!myDoc.exists || myDoc.data() == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      Map<String, dynamic> myData = myDoc.data() as Map<String, dynamic>;
+
+      // C. แปลงข้อมูล User อื่นๆ ให้เป็น format ที่พร้อมใช้งาน
       var formattedUsers = users.map((user) {
         return {
           ...user,
           "image": user['photoUrl'] ?? "https://via.placeholder.com/400",
           "name": user['name'] ?? "Unknown", 
-          "uid": user['uid'] ?? user['id'] ?? "", 
+          "uid": user['uid'] ?? user['id'] ?? "",
+          // เตรียมข้อมูลสำหรับ Matching (ถ้าไม่มีให้ใส่ List ว่างไว้)
+          "interests": user['interests'] ?? [],
+          "joinedActivities": user['joinedActivities'] ?? [],
+          "faculty": user['faculty'] ?? "",
+          "year": user['year'] ?? "",
         };
       }).toList();
 
+      // ✅ D. เรียกใช้ Matching Service เพื่อเรียงลำดับ!
+      // คนที่คะแนนเยอะสุด (ตรงใจที่สุด) จะขึ้นมาอยู่อันดับแรก
+      var sortedUsers = _matchingAlgorithm.sortUsersByCompatibility(
+        myProfile: myData, 
+        otherUsers: formattedUsers
+      );
+
       if (mounted) {
         setState(() {
-          _profiles = formattedUsers;
+          _profiles = sortedUsers; // ใช้ List ที่เรียงแล้ว
           _isLoading = false;
         });
+
+        // (Optional) Debug ดูผลลัพธ์ใน Console
+        print("--- Matching Results ---");
+        for(var u in sortedUsers.take(3)) {
+           print("Name: ${u['name']} | Score: ${u['matchScore']}");
+        }
       }
     } catch (e) {
       debugPrint("Error loading profiles: $e");
@@ -395,15 +430,15 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
           ),
           const SizedBox(width: 4),
           const Icon(Icons.favorite, color: Colors.red, size: 22),
-         
+          
         ],
       ),
       centerTitle: false,
       actions: [
-        IconButton(
+       /* IconButton(
           icon: const Icon(Icons.tune, color: Colors.grey),
           onPressed: () {}, 
-        )
+        ) */
       ],
       automaticallyImplyLeading: false
     );
