@@ -14,10 +14,17 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // เตรียมข้อมูล (ใส่ Default กันค่า Null)
     final String name = profileData['name'] ?? "Unknown";
-    final String age = profileData['age'] != null ? ", ${profileData['age']}" : "";
+    
+    // ❌ เอา Age ออก
+    // final String age = profileData['age'] != null ? ", ${profileData['age']}" : "";
+    
+    // ✅ ใส่ Year เข้าไปแทน
+    final String year = profileData['year'] ?? "";
+    final String displayYear = year.isNotEmpty ? ", $year" : "";
+
     final String faculty = profileData['faculty'] ?? "Kasetsart University";
     final String bio = profileData['bio'] ?? "";
-    final String? gender = profileData['gender']; // ดึงเพศมาใช้
+    final String? gender = profileData['gender']; 
     
     // ดึง Tags (ถ้าไม่มีให้ Mock ขึ้นมาโชว์ก่อน)
     final List<dynamic> interests = profileData['interests'] ?? ["Music", "Travel", "Cat Lover"]; 
@@ -103,12 +110,12 @@ class ProfileCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 3.1 ชื่อ + อายุ + เพศ + ไอคอนยืนยัน
+                  // 3.1 ชื่อ + ชั้นปี (แทนอายุ) + เพศ + ไอคอนยืนยัน
                   Row(
                     children: [
                       Flexible(
                         child: Text(
-                          "$name$age", 
+                          "$name$displayYear", // ✅ แสดงชั้นปีตรงนี้
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 28,
@@ -122,7 +129,7 @@ class ProfileCard extends StatelessWidget {
                       
                       const SizedBox(width: 8),
                       
-                      // ✅ เพิ่มไอคอนเพศตรงนี้ (เรียกฟังก์ชันด้านล่าง)
+                      // ไอคอนเพศ
                       Icon(
                         _getGenderIcon(gender),
                         color: _getGenderColor(gender), 
@@ -203,7 +210,7 @@ class ProfileCard extends StatelessWidget {
   }
 
   // ---------------------------------------------------
-  // ✅ Helper Functions สำหรับเลือกไอคอนและสีตามเพศ
+  // Helper Functions สำหรับเลือกไอคอนและสีตามเพศ
   // ---------------------------------------------------
   IconData _getGenderIcon(String? gender) {
     switch (gender) {

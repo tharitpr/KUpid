@@ -1,15 +1,15 @@
 // lib/screens/setup_profile_page.dart
 
-import 'dart:io'; // ✅ Needed for File
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart'; // ✅ For picking images
-import 'package:http/http.dart' as http; // ✅ For uploading to Cloudinary
-import 'dart:convert'; // ✅ For parsing JSON
-//import 'main_layout.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'setup_interests_page.dart';
+
 class SetupProfilePage extends StatefulWidget {
   const SetupProfilePage({super.key});
 
@@ -29,8 +29,9 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
   // Variables
   String? _selectedGender;
   String? _selectedFaculty;
+  String? _selectedYear; // ✅ เพิ่มตัวแปรชั้นปี
   bool _isLoading = false;
-  File? _imageFile; // ✅ Variable to store the selected image
+  File? _imageFile;
 
   // Constants for Design
   final Color _primaryColor = const Color(0xFF005030); // Deep Green
@@ -61,9 +62,14 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
   ];
 
   final List<String> _genders = ["Male", "Female", "LGBTQ+", "Prefer not to say"];
+  
+  // ✅ รายการชั้นปี
+  final List<String> _yearLevels = [
+    "Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "Year 6+", "Alumni"
+  ];
 
   // ---------------------------------------------------------
-  // ✅ 1. Function to Pick Image (Gallery/Camera)
+  // 1. Function to Pick Image
   // ---------------------------------------------------------
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -79,7 +85,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                 Navigator.pop(context);
                 final XFile? image = await picker.pickImage(
                   source: ImageSource.gallery,
-                  maxWidth: 800, // Resize to save data
+                  maxWidth: 800,
                 );
                 if (image != null) setState(() => _imageFile = File(image.path));
               },
@@ -103,13 +109,11 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
   }
 
   // ---------------------------------------------------------
-  // ✅ 2. Function to Upload Image to Cloudinary (Free & No Card)
+  // 2. Upload to Cloudinary
   // ---------------------------------------------------------
   Future<String?> _uploadImageToCloudinary(File image) async {
-    // 👇👇 REPLACE THESE WITH YOUR CLOUDINARY DETAILS 👇👇
     String cloudName = "dgdl2uy9z"; 
     String uploadPreset = "Kupid_tharit"; 
-    // 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
 
     try {
       var uri = Uri.parse("https://api.cloudinary.com/v1_1/$cloudName/image/upload");
@@ -124,7 +128,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
         var responseData = await response.stream.toBytes();
         var responseString = String.fromCharCodes(responseData);
         var jsonMap = jsonDecode(responseString);
-        return jsonMap['secure_url']; // Get the URL
+        return jsonMap['secure_url'];
       } else {
         debugPrint("Upload Failed: ${response.statusCode}");
         return null;
@@ -156,7 +160,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
       String uid = currentUser.uid;
       String studentId = _studentIdController.text.trim();
 
-      // Check for duplicate Student ID
+      // Check duplicate ID
       final QuerySnapshot existingUser = await FirebaseFirestore.instance
           .collection('users')
           .where('studentId', isEqualTo: studentId)
@@ -168,24 +172,20 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
         throw "Student ID ($studentId) is already taken.";
       }
 
-      // ✅ 3. Upload Image Logic
+      // Upload Image
       String? photoUrl;
       if (_imageFile != null) {
-        // If user picked an image, upload to Cloudinary
         photoUrl = await _uploadImageToCloudinary(_imageFile!);
       } 
       photoUrl ??= "";
-      // If upload failed or no image picked, use default avatar
-     /* photoUrl ??= _selectedGender == 'Female'
-            ? 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=600'
-            : 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=600';
-      */
-      // ✅ 4. Save to Firestore
+      
+      // ✅ Save to Firestore (Included 'year')
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'name': _nameController.text.trim(),
         'studentId': studentId,
         'gender': _selectedGender,
         'faculty': _selectedFaculty,
+        'year': _selectedYear, // ✅ บันทึกชั้นปี
         'age': int.tryParse(_ageController.text.trim()) ?? 20,
         'bio': _bioController.text.trim(),
         'isProfileComplete': true,
@@ -196,7 +196,6 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
       if (mounted) {
         Navigator.push(
           context,
-          // ใช้ MaterialPageRoute ปลอดภัยกว่า pushNamed (ไม่ต้องไปแก้ main.dart)
           MaterialPageRoute(builder: (context) => const SetupInterestsPage()), 
         );
       }
@@ -242,13 +241,10 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✅ Avatar Section (Clickable)
+              // Avatar Section
               Center(
-                child: Stack(
-                  children: [
-                    // 1. ตัวรูปภาพ Avatar (กดเพื่อเปลี่ยนรูป)
-                GestureDetector(
-                  onTap: _pickImage, // Tap to pick image
+                child: GestureDetector(
+                  onTap: _pickImage,
                   child: Stack(
                     children: [
                       Container(
@@ -265,7 +261,6 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                         child: CircleAvatar(
                           radius: 55,
                           backgroundColor: Colors.white,
-                          // If image selected, show it. Else show icon.
                           backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
                           child: _imageFile == null
                               ? CircleAvatar(
@@ -289,39 +284,8 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                           child: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
                         ),
                       ),
-                      if (_imageFile != null)
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _imageFile = null; // ล้างค่ารูปภาพทิ้ง
-                            });
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[600], // สีแดง
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: .2),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                )
-                              ],
-                            ),
-                            child: const Icon(Icons.close, color: Colors.white, size: 16),
-                          ),
-                        ),
-                      ),
                     ],
-                    
                   ),
-                ),
-                ],
                 ),
               ),
               const SizedBox(height: 30),
@@ -352,29 +316,33 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                 validator: _validateStudentId,
               ),
 
-              // 3. Faculty & Gender Row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: _buildModernDropdown(
-                      label: "Faculty",
-                      icon: Icons.domain,
-                      value: _selectedFaculty,
-                      items: _faculties,
-                      onChanged: (val) => setState(() => _selectedFaculty = val),
-                    ),
-                  ),
-                ],
+              // 3. Faculty (Full Width)
+              _buildModernDropdown(
+                label: "Faculty",
+                icon: Icons.domain,
+                value: _selectedFaculty,
+                items: _faculties,
+                onChanged: (val) => setState(() => _selectedFaculty = val),
               ),
               const SizedBox(height: 20),
 
+              // ✅ 4. Year Level & Gender (Split Row)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    flex: 2,
+                    flex: 1,
+                    child: _buildModernDropdown(
+                      label: "Year", // ✅ ช่องเลือกชั้นปี
+                      icon: Icons.school,
+                      value: _selectedYear,
+                      items: _yearLevels,
+                      onChanged: (val) => setState(() => _selectedYear = val),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    flex: 1,
                     child: _buildModernDropdown(
                       label: "Gender",
                       icon: Icons.wc,
@@ -383,57 +351,33 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                       onChanged: (val) => setState(() => _selectedGender = val),
                     ),
                   ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    flex: 1,
-                    child: _buildModernField(
-                      controller: _ageController,
-                      label: "Age",
-                      hint: "20",
-                      icon: Icons.cake_outlined,
-                      isNumber: true,
-                      maxLength: 2,
-                      validator: (val) => val!.isEmpty ? "Req" : null,
-                    ),
-                  ),
                 ],
+              ),
+              const SizedBox(height: 20),
+
+              // 5. Age (Standalone or you can combine)
+              _buildModernField(
+                controller: _ageController,
+                label: "Age",
+                hint: "20",
+                icon: Icons.cake_outlined,
+                isNumber: true,
+                maxLength: 2,
+                validator: (val) => val!.isEmpty ? "Req" : null,
               ),
 
               const SizedBox(height: 20),
               const Divider(height: 40, color: Colors.black12),
 
-              // 4. BIO SECTION
+              // 6. Bio
               const Text("Your Bio", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _primaryColor.withValues( alpha: .05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _primaryColor.withValues(alpha: .1)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.lightbulb_outline, color: _primaryColor, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        "Tip: Mention your hobbies, favorite food, or study major to start a conversation!",
-                        style: TextStyle(fontSize: 12, color: _primaryColor.withValues(alpha: .8)),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 15),
-
               _buildModernField(
                 controller: _bioController,
                 label: "Bio",
                 icon: Icons.edit_note,
                 maxLines: 4,
-                hint: "Ex. I love playing Badminton at Gyimnasium 1, hunting for Shabu buffets, and I'm currently suffering in GenPhy...",
+                hint: "Ex. I love playing Badminton, hunting for Shabu buffets...",
               ),
 
               const SizedBox(height: 40),
@@ -466,7 +410,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
                   onPressed: _isLoading ? null : _saveProfile,
                   child: _isLoading
                       ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text("Complete Profile", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                      : const Text("Next Step", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 1)),
                 ),
               ),
               const SizedBox(height: 40),
@@ -477,7 +421,7 @@ class _SetupProfilePageState extends State<SetupProfilePage> {
     );
   }
 
-  // Helper Widgets (Unchanged)
+  // Helper Widgets
   Widget _buildModernField({
     required TextEditingController controller,
     required String label,
