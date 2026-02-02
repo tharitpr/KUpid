@@ -37,7 +37,7 @@ class ProfileCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues( alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -90,8 +90,8 @@ class ProfileCard extends StatelessWidget {
                   colors: [
                     Colors.transparent,
                     Colors.transparent,
-                    Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.9), 
+                    Colors.black.withValues(alpha: .1),
+                    Colors.black.withValues(alpha: .9), 
                   ],
                   stops: const [0.0, 0.5, 0.7, 1.0],
                 ),
@@ -183,7 +183,7 @@ class ProfileCard extends StatelessWidget {
                             margin: const EdgeInsets.only(right: 6), 
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF006400).withOpacity(0.9),
+                              color: const Color(0xFF006400).withValues(alpha: .9),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Colors.white30),
                             ),
@@ -207,7 +207,7 @@ class ProfileCard extends StatelessWidget {
                   // 4.4 เส้นคั่น
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Divider(color: Colors.white.withOpacity(0.3), height: 1),
+                    child: Divider(color: Colors.white.withValues(alpha: .3), height: 1),
                   ),
 
                   // 4.5 Interest Tags
@@ -221,9 +221,9 @@ class ProfileCard extends StatelessWidget {
                           return Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(  alpha: .2),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.white.withOpacity(0.1)),
+                              border: Border.all(color: Colors.white.withValues(alpha: .1)),
                             ),
                             child: Text(
                               "$tag",
@@ -276,12 +276,12 @@ class ProfileCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6), // พื้นหลังทึบแสงให้อ่านง่าย
+        color: Colors.black.withValues(alpha: .6), // พื้นหลังทึบแสงให้อ่านง่าย
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: badgeColor.withOpacity(0.5), width: 1),
+        border: Border.all(color: badgeColor.withValues(alpha: .5), width: 1),
         boxShadow: [
           BoxShadow(
-            color: badgeColor.withOpacity(0.2),
+            color: badgeColor.withValues(alpha: .2),
             blurRadius: 8,
             spreadRadius: 1,
           )
@@ -302,7 +302,7 @@ class ProfileCard extends StatelessWidget {
               if(score >= 30) // โชว์ข้อความเฉพาะคะแนนเยอะๆ
               Text(
                 label, 
-                style: TextStyle(color: badgeColor.withOpacity(0.8), fontSize: 8)
+                style: TextStyle(color: badgeColor.withValues(alpha: .8), fontSize: 8)
               ),
             ],
           ),

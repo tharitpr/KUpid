@@ -63,7 +63,7 @@ class _AppTutorialDialogState extends State<AppTutorialDialog> {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: _tutorialData[index]['color'].withOpacity(0.1),
+                          color: _tutorialData[index]['color'].withValues(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(

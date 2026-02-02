@@ -153,8 +153,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Profile Updated! ✅")));
         Navigator.pop(context); // กลับไปหน้า Profile
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+   } catch (e) {
+      // 1. เช็ค mounted ของ State ก่อน
+      if (!mounted) return;
+      
+      // 2. ดึง ScaffoldMessengerState ออกมาล่วงหน้า หรือเช็ค context.mounted อีกครั้ง
+      final messenger = ScaffoldMessenger.of(context);
+      
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -336,7 +346,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: .08), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: DropdownButtonFormField<String>(
-        value: value,
+        initialValue: value,
         items: items.map((item) => DropdownMenuItem(value: item, child: Text(item, overflow: TextOverflow.ellipsis))).toList(),
         onChanged: onChanged,
         dropdownColor: Colors.white,

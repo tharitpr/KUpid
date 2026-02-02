@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: .2),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.volunteer_activism, color: Colors.white, size: 40),
@@ -150,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF005433).withOpacity(0.1),
+            color: const Color(0xFF005433).withValues(alpha: .1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: const Color(0xFF005433), size: 20),

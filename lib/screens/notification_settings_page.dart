@@ -43,7 +43,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2)),
+                  BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 5, offset: const Offset(0, 2)),
                 ],
               ),
               child: Column(
@@ -88,7 +88,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2)),
+                  BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 5, offset: const Offset(0, 2)),
                 ],
               ),
               child: Column(
@@ -138,7 +138,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     required Function(bool) onChanged,
   }) {
     return SwitchListTile(
-      activeColor: Colors.white,
+      activeThumbColor: Colors.white,
       activeTrackColor: const Color(0xFF1DB954), // สีเขียวสวยๆ
       secondary: Container(
         padding: const EdgeInsets.all(8),

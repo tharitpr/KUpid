@@ -114,9 +114,9 @@ class MyProfilePreviewPage extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF006400).withOpacity(0.08),
+                        color: const Color(0xFF006400).withValues(alpha: .08),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFF006400).withOpacity(0.3)),
+                        border: Border.all(color: const Color(0xFF006400).withValues(alpha: .3)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,9 +166,9 @@ class MyProfilePreviewPage extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF006400).withOpacity(0.05),
+                            color: const Color(0xFF006400).withValues(alpha: .05),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFF006400).withOpacity(0.1)),
+                            border: Border.all(color: const Color(0xFF006400).withValues(alpha: .1)),
                           ),
                           child: Text("$tag", style: const TextStyle(color: Color(0xFF006400), fontWeight: FontWeight.w600)),
                         );

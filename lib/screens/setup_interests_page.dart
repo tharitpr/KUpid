@@ -210,7 +210,7 @@ class _SetupInterestsPageState extends State<SetupInterestsPage> {
                         const SizedBox(height: 25),
                       ],
                     );
-                  }).toList(),
+                  }),
                   
                   const SizedBox(height: 80), // เผื่อที่ให้ปุ่มข้างล่าง
                 ],

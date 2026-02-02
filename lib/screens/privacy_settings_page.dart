@@ -43,7 +43,7 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2)),
+                  BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 5, offset: const Offset(0, 2)),
                 ],
               ),
               child: Column(
@@ -86,9 +86,9 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: _primaryGreen.withOpacity(0.2)),
+                border: Border.all(color: _primaryGreen.withValues(alpha: .2)),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2)),
+                  BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 5, offset: const Offset(0, 2)),
                 ],
               ),
               child: Column(
@@ -150,7 +150,7 @@ class _PrivacySettingsPageState extends State<PrivacySettingsPage> {
   // Helper Widget สำหรับสร้าง Switch สวยๆ
   Widget _buildSwitchTile({required String title, required String subtitle, required bool value, required Function(bool) onChanged}) {
     return SwitchListTile(
-      activeColor: Colors.white,
+      activeThumbColor: Colors.white,
       activeTrackColor: const Color(0xFF1DB954), // สีเขียว Spotify/KU
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),

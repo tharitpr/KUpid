@@ -198,7 +198,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: .05),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -221,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withValues(alpha: .1),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     )
@@ -251,7 +251,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     shape: BoxShape.circle,
                                     border: Border.all(color: Colors.white, width: 2),
                                     boxShadow: [
-                                      BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)
+                                      BoxShadow(color: Colors.black.withValues(alpha: .2), blurRadius: 4)
                                     ],
                                   ),
                                   child: const Icon(Icons.edit, color: Colors.white, size: 16),
@@ -318,9 +318,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         width: double.infinity,
                         height: 50,
                         decoration: BoxDecoration(
-                          color: _primaryGreen.withOpacity(0.08),
+                          color: _primaryGreen.withValues(alpha: .08),
                           borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: _primaryGreen.withOpacity(0.3)),
+                          border: Border.all(color: _primaryGreen.withValues(alpha: .3)),
                         ),
                         child: Material(
                           color: Colors.transparent,
@@ -375,7 +375,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: .05),
                           blurRadius: 10,
                           offset: const Offset(0, 2))
                     ],
@@ -422,7 +422,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 border: Border.all(color: Colors.grey[200]!),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withOpacity(0.1),
+                                    color: Colors.grey.withValues(alpha: .1),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -434,7 +434,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 leading: Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: _primaryGreen.withOpacity(0.1),
+                                    color: _primaryGreen.withValues(alpha: .1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(Icons.confirmation_number,
@@ -454,9 +454,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                     padding:
                                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.08),
+                                      color: Colors.red.withValues(alpha: .08),
                                       borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: Colors.red.withOpacity(0.2)),
+                                      border: Border.all(color: Colors.red.withValues(alpha: .2)),
                                     ),
                                     child: const Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -494,7 +494,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, 2))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,7 +560,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, 2))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -613,7 +613,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   onTap: () => _deletePhoto(imgUrl),
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(color: Colors.red.withOpacity(0.8), shape: BoxShape.circle),
+                                    decoration: BoxDecoration(color: Colors.red.withValues(alpha: .8), shape: BoxShape.circle),
                                     child: const Icon(Icons.close, color: Colors.white, size: 14),
                                   ),
                                 ),
@@ -635,7 +635,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, 2))],
                   ),
                   child: Column(
                     children: [
@@ -659,7 +659,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), shape: BoxShape.circle),
+                                decoration: BoxDecoration(color: Colors.red.withValues(alpha: .1), shape: BoxShape.circle),
                                 child: const Icon(Icons.sos, color: Colors.red, size: 22),
                               ),
                               const SizedBox(width: 12),
@@ -737,9 +737,9 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _primaryGreen.withOpacity(0.08),
+        color: _primaryGreen.withValues(alpha: .08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _primaryGreen.withOpacity(0.2)),
+        border: Border.all(color: _primaryGreen.withValues(alpha: .2)),
       ),
       child: Text(label, style: TextStyle(color: _primaryGreen, fontWeight: FontWeight.w600, fontSize: 13)),
     );

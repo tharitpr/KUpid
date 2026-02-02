@@ -179,7 +179,17 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
         Navigator.pop(context);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      // 1. เช็ค mounted ของ State ก่อน
+      if (!mounted) return;
+      
+      // 2. ดึง ScaffoldMessengerState ออกมาล่วงหน้า หรือเช็ค context.mounted อีกครั้ง
+      final messenger = ScaffoldMessenger.of(context);
+      
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

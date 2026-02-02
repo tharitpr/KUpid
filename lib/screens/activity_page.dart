@@ -157,22 +157,23 @@ class _ActivityCardState extends State<ActivityCard> {
         'joinedActivities': FieldValue.arrayUnion([widget.item['title']]),
       });
 
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 10),
-                Expanded(child: Text("ลงทะเบียน '${widget.item['title']}' เรียบร้อย!")),
-              ],
-            ),
-            backgroundColor: const Color(0xFF1DB954),
-            behavior: SnackBarBehavior.floating,
+      // เปลี่ยนจาก if (mounted) เป็น if (!context.mounted) return;
+      if (!context.mounted) return;
+
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 10),
+              Expanded(child: Text("ลงทะเบียน '${widget.item['title']}' เรียบร้อย!")),
+            ],
           ),
-        );
-      }
+          backgroundColor: const Color(0xFF1DB954),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } catch (e) {
       debugPrint("Error joining: $e");
       if (mounted) {
@@ -219,7 +220,7 @@ class _ActivityCardState extends State<ActivityCard> {
                         top: 15,
                         right: 15,
                         child: CircleAvatar(
-                          backgroundColor: Colors.black.withOpacity(0.5),
+                          backgroundColor: Colors.black.withValues(alpha: .5),
                           child: IconButton(
                             icon: const Icon(Icons.close, color: Colors.white),
                             onPressed: () => Navigator.pop(context),
@@ -239,7 +240,7 @@ class _ActivityCardState extends State<ActivityCard> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1DB954).withOpacity(0.1),
+                                  color: const Color(0xFF1DB954).withValues(alpha: .1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -307,7 +308,7 @@ class _ActivityCardState extends State<ActivityCard> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
+                        BoxShadow(color: Colors.black.withValues(alpha: .05), blurRadius: 10, offset: const Offset(0, -5)),
                       ],
                     ),
                     child: SizedBox(
@@ -374,7 +375,7 @@ class _ActivityCardState extends State<ActivityCard> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: .1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -407,7 +408,7 @@ class _ActivityCardState extends State<ActivityCard> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: .9),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -427,7 +428,7 @@ class _ActivityCardState extends State<ActivityCard> {
                     decoration: BoxDecoration(
                       color: Colors.green, // พื้นหลังสีเขียวทึบ
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .2), blurRadius: 4)],
                     ),
                     child: const Row(
                       children: [

@@ -116,9 +116,9 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
         });
 
         // (Optional) Debug ดูผลลัพธ์ใน Console
-        print("--- Matching Results ---");
+        debugPrint("--- Matching Results ---");
         for(var u in sortedUsers.take(3)) {
-           print("Name: ${u['name']} | Score: ${u['matchScore']}");
+           debugPrint("Name: ${u['name']} | Score: ${u['matchScore']}");
         }
       }
     } catch (e) {
@@ -167,7 +167,7 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: .2),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -206,7 +206,7 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
                     height: 130,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFF006400).withOpacity(0.1),
+                      color: const Color(0xFF006400).withValues(alpha: .1),
                     ),
                   ),
                   // รูป Profile
@@ -264,7 +264,7 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF32CD32).withOpacity(0.4),
+                      color: const Color(0xFF32CD32).withValues(alpha: .4),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -533,7 +533,7 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20), 
-          color: isLike ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+          color: isLike ? Colors.green.withValues(alpha: .2) : Colors.red.withValues(alpha: .2),
         ),
         child: Center(
           child: Transform.rotate(
@@ -572,7 +572,7 @@ class _SwipePageState extends State<SwipePage> with SingleTickerProviderStateMix
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: .1),
             ),
             child: const Icon(Icons.search, size: 60, color: Colors.green),
           ),

@@ -143,7 +143,7 @@ class _ChatListPageState extends State<ChatListPage> {
                                         padding: const EdgeInsets.all(3),
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.red.withOpacity(0.5), width: 2),
+                                          border: Border.all(color: Colors.red.withValues(alpha: .5), width: 2),
                                         ),
                                         child: CircleAvatar(
                                           radius: 30,

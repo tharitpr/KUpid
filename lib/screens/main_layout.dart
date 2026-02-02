@@ -73,7 +73,7 @@ class _MainLayoutState extends State<MainLayout> {
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: .05),
                 blurRadius: 10,
                 offset: const Offset(0, -5),
               ),
@@ -83,7 +83,7 @@ class _MainLayoutState extends State<MainLayout> {
             selectedIndex: _selectedIndex,
             onDestinationSelected: _onItemTapped,
             backgroundColor: Colors.white,
-            indicatorColor: const Color(0xFF006400).withOpacity(0.15), // สีพื้นหลังปุ่มที่ถูกเลือก (เขียวอ่อนจางๆ)
+            indicatorColor: const Color(0xFF006400).withValues(alpha: .15), // สีพื้นหลังปุ่มที่ถูกเลือก (เขียวอ่อนจางๆ)
             destinations: const [
               NavigationDestination(
                 icon: Icon(Icons.home_outlined),
