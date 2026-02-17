@@ -1,85 +1,76 @@
-// lib/services/matching_algorithm_service.dart
+import 'dart:math';
 
 class MatchingAlgorithmService {
   
   // ฟังก์ชันหลัก: เรียงลำดับผู้ใช้ตามความเหมาะสม (Compatibility Score)
-  List<Map<String, dynamic>> sortUsersByCompatibility({
-    required Map<String, dynamic> myProfile, 
-    required List<Map<String, dynamic>> otherUsers
-  }) {
-    // 1. วนลูปให้คะแนนทุกคน
-    for (var user in otherUsers) {
-      int score = _calculateScore(myProfile, user);
-      user['matchScore'] = score; // แปะคะแนนไว้ที่ตัว user
+    List<Map<String, dynamic>> sortUsersByCompatibility({
+      required Map<String, dynamic> myProfile, 
+      required List<Map<String, dynamic>> otherUsers
+    }) {
+      for (var user in otherUsers) {
+        // เปลี่ยนมาใช้การคำนวณแบบใหม่ที่ให้ผลลัพธ์เป็น 0-100%
+        double score = _calculateJaccardBoostScore(myProfile, user);
+        user['matchScore'] = score.round(); 
+      }
+
+      otherUsers.sort((a, b) {
+        int scoreA = a['matchScore'] ?? 0;
+        int scoreB = b['matchScore'] ?? 0;
+        return scoreB.compareTo(scoreA);
+      });
+
+      return otherUsers;
     }
 
-    // 2. เรียงลำดับ (คะแนนมาก -> น้อย)
-    // ถ้าคะแนนเท่ากัน ให้สุ่มลำดับนิดหน่อยเพื่อความไม่จำเจ
-    otherUsers.sort((a, b) {
-      int scoreA = a['matchScore'] ?? 0;
-      int scoreB = b['matchScore'] ?? 0;
-      return scoreB.compareTo(scoreA); // มากไปน้อย
-    });
+    // ฟังก์ชันย่อย: คำนวณคะแนนด้วยหลักการ Jaccard + Boosting
+    double _calculateJaccardBoostScore(Map<String, dynamic> me, Map<String, dynamic> other) {
+      
+      // 1. คำนวณค่าความคล้ายคลึงพื้นฐาน (Jaccard Index: Intersection / Union)
+      double rawInterestIdx = _getJaccardIndex(me['interests'] ?? [], other['interests'] ?? []);
+      double rawActivityIdx = _getJaccardIndex(me['joinedActivities'] ?? [], other['joinedActivities'] ?? []);
 
-    return otherUsers;
+      // หากไม่มีอะไรตรงกันเลย ให้ 0 ทันที
+      if (rawInterestIdx == 0 && rawActivityIdx == 0) return 0.0;
+
+      // ---------------------------------------------------------
+      // หลักการ Scale คะแนนให้สูง (The 80% Target Strategy)
+      // ---------------------------------------------------------
+      
+      // A. Base Score (คะแนนฐาน): ทันทีที่มีจุดร่วม เราให้ "แต้มเปิดใจ" ก่อนเลย 45 คะแนน
+      // เพื่อให้คะแนนไม่ดูน้อยเกินไปจนผู้ใช้เสียความรู้สึก
+      double score = 45.0;
+
+      // B. Interest Boost (น้ำหนัก 35%): 
+      // ใช้ sqrt() เพื่อดึงค่าที่น้อยให้สูงขึ้น เช่น 0.2 (20%) จะกลายเป็น 0.44 (44%)
+      // แล้วคูณด้วยน้ำหนัก 35 คะแนน
+      score += (sqrt(rawInterestIdx) * 35);
+
+      // C. Activity Boost (น้ำหนัก 10%):
+      score += (sqrt(rawActivityIdx) * 10);
+
+      // D. Community Bonus (10%): 
+      // ถ้าอยู่คณะเดียวกันหรือปีเดียวกัน ให้คะแนนส่วนนี้เพิ่มเข้าไปตรงๆ
+      if (me['faculty'] != null && me['faculty'] != "" && me['faculty'] == other['faculty']) {
+        score += 7.0; // คณะเดียวกันได้ 7%
+      }
+      if (me['year'] != null && me['year'] != "" && me['year'] == other['year']) {
+        score += 3.0; // ปีเดียวกันได้ 3%
+      }
+
+      // จำกัดผลลัพธ์ไม่ให้เกิน 100
+      return score.clamp(0.0, 100.0);
+    }
+
+    // ฟังก์ชันคำนวณสัดส่วน Jaccard (เป็นมาตรฐานสากล)
+    double _getJaccardIndex(List listA, List listB) {
+      if (listA.isEmpty || listB.isEmpty) return 0.0;
+      
+      final setA = listA.toSet();
+      final setB = listB.toSet();
+      
+      final intersection = setA.intersection(setB).length;
+      final union = setA.union(setB).length;
+      
+      return intersection / union; 
+    }
   }
-
-  // ฟังก์ชันย่อย: คำนวณคะแนนความเข้ากันได้
-  int _calculateScore(Map<String, dynamic> me, Map<String, dynamic> other) {
-    int score = 0;
-
-    // ---------------------------------------------------------
-    // 1. INTERESTS (ความสนใจ) - Priority สูงสุด (สำคัญอันดับ 1)
-    // ---------------------------------------------------------
-    // ให้คะแนนสูงถึง 30 คะแนน ต่อ 1 เรื่องที่ตรงกัน
-    List myInterests = me['interests'] ?? [];
-    List theirInterests = other['interests'] ?? [];
-    
-    // หาตัวที่ซ้ำกัน (Intersection)
-    var commonInterests = myInterests.toSet().intersection(theirInterests.toSet());
-    score += (commonInterests.length * 30); 
-
-
-    // ---------------------------------------------------------
-    // 2. ACTIVITIES (กิจกรรมร่วมกัน) - Priority รองลงมา
-    // ---------------------------------------------------------
-    // ให้ 20 คะแนน ถ้าเข้าร่วมกิจกรรมเดียวกัน (แสดงว่าว่างตรงกัน/ชอบอะไรคล้ายกัน)
-    List myActivities = me['joinedActivities'] ?? [];
-    List theirActivities = other['joinedActivities'] ?? [];
-
-    var commonActivities = myActivities.toSet().intersection(theirActivities.toSet());
-    score += (commonActivities.length * 20);
-
-
-    // ---------------------------------------------------------
-    // 3. FACULTY (คณะ)
-    // ---------------------------------------------------------
-    // ให้ 10 คะแนน ถ้าอยู่คณะเดียวกัน (คุยกันง่ายขึ้น)
-    String myFaculty = me['faculty'] ?? "";
-    String theirFaculty = other['faculty'] ?? "";
-    if (myFaculty.isNotEmpty && myFaculty == theirFaculty) {
-      score += 10;
-    }
-
-
-    // ---------------------------------------------------------
-    // 4. YEAR (ชั้นปี) & AGE (อายุ)
-    // ---------------------------------------------------------
-    // ให้ 5 คะแนน ถ้าอยู่ปีเดียวกัน
-    String myYear = me['year'] ?? "";
-    String theirYear = other['year'] ?? "";
-    if (myYear.isNotEmpty && myYear == theirYear) {
-      score += 5;
-    }
-
-    // (แถม) อายุใกล้เคียงกัน (+/- 1 ปี) ให้เพิ่มอีก 3 คะแนน
-    // สมมติว่ามี field 'age' หรือคำนวณจากปีเกิด
-    // int myAge = int.tryParse(me['age'].toString()) ?? 0;
-    // int theirAge = int.tryParse(other['age'].toString()) ?? 0;
-    // if (myAge > 0 && theirAge > 0 && (myAge - theirAge).abs() <= 1) {
-    //   score += 3;
-    // }
-
-    return score;
-  }
-}
