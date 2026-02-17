@@ -64,9 +64,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F4F7), 
       
-      // ----------------------------------------------------
+   
       // APP BAR
-      // ----------------------------------------------------
+      
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.5,

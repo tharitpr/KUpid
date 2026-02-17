@@ -6,9 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 class EmergencyContactDialog extends StatelessWidget {
   const EmergencyContactDialog({super.key});
 
-  // เบอร์โทรฉุกเฉิน ม.เกษตร
-  final String _kuEmergencyNumber = "029428111"; // เบอร์กองยานฯ / ฉุกเฉิน มก.
-  final String _securityNumber = "025790113";    // เบอร์ รปภ.
+  
+  final String _kuEmergencyNumber = "029428111"; 
+  final String _securityNumber = "025790113";   
 
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri launchUri = Uri(
@@ -37,9 +37,9 @@ class EmergencyContactDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ---------------------------------------------
+    
             // 1. Header สีแดงไล่เฉด (Gradient Header)
-            // ---------------------------------------------
+           
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -86,9 +86,9 @@ class EmergencyContactDialog extends StatelessWidget {
               ),
             ),
 
-            // ---------------------------------------------
+            
             // 2. Content & Buttons
-            // ---------------------------------------------
+            
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
               child: Column(
@@ -100,7 +100,7 @@ class EmergencyContactDialog extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // ปุ่ม 1: พยาบาล/กองยาน (สีส้ม)
+                 
                   _buildEmergencyButton(
                     label: "เรียกรถพยาบาล / กองยานฯ",
                     subLabel: "Medical / Vehicle Service",
@@ -111,7 +111,7 @@ class EmergencyContactDialog extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  // ปุ่ม 2: รปภ. (สีแดง)
+             
                   _buildEmergencyButton(
                     label: "แจ้งเหตุ รปภ. มก.",
                     subLabel: "Security Guard",
@@ -122,7 +122,7 @@ class EmergencyContactDialog extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // ปุ่ม Cancel
+                  // Cancel
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     style: TextButton.styleFrom(
@@ -140,7 +140,7 @@ class EmergencyContactDialog extends StatelessWidget {
     );
   }
 
-  // Widget Helper สำหรับสร้างปุ่มสวยๆ
+  // Widget Helper 
   Widget _buildEmergencyButton({
     required String label,
     required String subLabel,
